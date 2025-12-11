@@ -1,4 +1,4 @@
-import { Vendor } from 'src/vendors/entities/vendor.entity';
+
 import {
   ObjectType,
   Field,
@@ -14,15 +14,20 @@ import {
   OneToMany,
   RelationId,
 } from 'typeorm';
-import { BaseEntity } from '../../common/entities/base.entity';
+
 import { Order } from './order.entity';
-import { Product } from '../../products/entities/product.entity';
+
 import { OrderTracking } from './order-tracking.entity';
 import { OrderStatus } from '../enum/order-status.enum';
+import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
+import { Product } from '../../product/entities/product.entity';
+import { Vendor } from '../../vendors/entities/vendor.entity';
+import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
 
 @ObjectType()
 @Entity('order_items')
-export class OrderItem extends BaseEntity {
+@GeneratePermissions()
+export class OrderItem extends AppBaseEntity {
   @Field(() => Int)
   @Column({ type: 'int' })
   quantity: number;

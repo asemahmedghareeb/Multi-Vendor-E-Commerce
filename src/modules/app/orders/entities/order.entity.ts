@@ -1,15 +1,18 @@
 import { ObjectType, Field, Float } from '@nestjs/graphql';
 import { Entity, Column, ManyToOne, OneToMany, JoinColumn, OneToOne } from 'typeorm';
-import { BaseEntity } from '../../common/entities/base.entity';
-import { User } from '../../users/entities/user.entity';
 import { OrderItem } from './order-item.entity';
-import { Payment } from 'src/payments/entities/payment.entity';
+
 import { OrderStatus } from '../enum/order-status.enum';
+import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
+import { User } from '../../auth-base/user/entities/user.entity';
+import { Payment } from '../../payments/entities/payment.entity';
+import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
 
 
 @ObjectType()
 @Entity('orders')
-export class Order extends BaseEntity {
+@GeneratePermissions()
+export class Order extends AppBaseEntity {
 
   @Field(() => User)
   @ManyToOne(() => User, { onDelete: 'SET NULL' })

@@ -7,9 +7,10 @@ import {
   Index,
   OneToMany,
 } from 'typeorm';
-import { BaseEntity } from '../../common/entities/base.entity';
 import { Order } from '../../orders/entities/order.entity';
 import { Refund } from './refund.entity';
+import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
+import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
 
 export enum PaymentStatus {
   PENDING = 'PENDING',
@@ -25,7 +26,8 @@ registerEnumType(PaymentStatus, { name: 'PaymentStatus' });
 
 @ObjectType()
 @Entity('payments')
-export class Payment extends BaseEntity {
+@GeneratePermissions()
+export class Payment extends AppBaseEntity {
   @Field(() => Order)
   @OneToOne(() => Order, (order) => order.payment, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'order_id' })

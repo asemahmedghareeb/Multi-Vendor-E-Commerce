@@ -10,9 +10,11 @@ import { ObjectType, Field, Int, Parent } from '@nestjs/graphql';
 
 import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
 import { Product } from '../../product/entities/product.entity';
+import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
 
 @ObjectType()
 @Entity('categories')
+@GeneratePermissions()
 export class Category extends AppBaseEntity {
   @Field()
   @Column()

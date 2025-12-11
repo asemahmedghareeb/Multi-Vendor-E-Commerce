@@ -7,15 +7,19 @@ import {
   Unique,
   RelationId,
 } from 'typeorm';
-import { BaseEntity } from '../../common/entities/base.entity';
-import { User } from '../../users/entities/user.entity';
+
 import { Order } from '../../orders/entities/order.entity';
-import { Vendor } from 'src/vendors/entities/vendor.entity';
+
+import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
+import { User } from '../../auth-base/user/entities/user.entity';
+import { Vendor } from '../../vendors/entities/vendor.entity';
+import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
 
 @ObjectType()
 @Entity('reviews')
 @Unique(['user', 'vendor', 'order'])
-export class Review extends BaseEntity {
+@GeneratePermissions()
+export class Review extends AppBaseEntity {
   @Field(() => Int)
   @Column({ type: 'int' })
   rating: number;

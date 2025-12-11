@@ -13,6 +13,7 @@ import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.e
 import { User } from '../../auth-base/user/entities/user.entity';
 import { Product } from '../../product/entities/product.entity';
 import { OrderItem } from '../../orders/entities/order-item.entity';
+import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
 
 export enum VendorStatus {
   PENDING = 'PENDING',
@@ -22,6 +23,7 @@ export enum VendorStatus {
 
 @ObjectType()
 @Entity('vendors')
+@GeneratePermissions()
 export class Vendor extends AppBaseEntity {
   @Field()
   @Column()

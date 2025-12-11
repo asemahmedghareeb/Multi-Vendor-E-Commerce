@@ -1,12 +1,12 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { Entity, Column, ManyToOne, JoinColumn, RelationId } from 'typeorm'; // <--- Import RelationId
-import { BaseEntity } from '../../common/entities/base.entity';
 import { OrderItem } from './order-item.entity';
 import { OrderStatus } from '../enum/order-status.enum';
+import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
 
 @ObjectType()
 @Entity('order_tracking')
-export class OrderTracking extends BaseEntity {
+export class OrderTracking extends AppBaseEntity {
   @Field(() => OrderStatus)
   @Column({
     type: 'enum',

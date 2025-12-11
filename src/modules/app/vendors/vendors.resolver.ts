@@ -11,20 +11,15 @@ import {
 import { VendorService } from './vendors.service';
 import { UseGuards } from '@nestjs/common';
 import { Vendor, VendorStatus } from './entities/vendor.entity';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { UserLoader } from 'src/dataLoaders/user.loader';
-import { User } from 'src/users/entities/user.entity';
-import { Review } from 'src/reviews/entities/review.entity';
 import { ReviewsLoader } from 'src/dataLoaders/reviews.loader';
 import { ProductLoader } from 'src/dataLoaders/products.loader';
-import { OrderItem } from 'src/orders/entities/order-item.entity';
-import { genericPaginated } from 'src/common/dto/paginated-output';
-import { PaginationInput } from 'src/common/dto/pagination.input';
-import { paginatedProduct } from 'src/products/products.resolver';
+
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
 import { Auth } from 'src/common/decorators/auth.decorator';
+import { User } from '../auth-base/user/entities/user.entity';
+import { OrderItem } from '../orders/entities/order-item.entity';
+import { Review } from '../reviews/entities/review.entity';
 const paginatedVendors = genericPaginated(Vendor);
 
 @Resolver(() => Vendor)

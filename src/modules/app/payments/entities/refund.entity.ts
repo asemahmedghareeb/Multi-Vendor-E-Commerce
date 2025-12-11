@@ -1,11 +1,13 @@
 import { ObjectType, Field, Float } from '@nestjs/graphql';
 import { Entity, Column, ManyToOne, JoinColumn, RelationId } from 'typeorm';
-import { BaseEntity } from '../../common/entities/base.entity';
 import { Payment } from './payment.entity';
+import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
+import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
 
 @ObjectType()
 @Entity('refunds')
-export class Refund extends BaseEntity {
+@GeneratePermissions()
+export class Refund extends AppBaseEntity {
   
   @Field(() => Float)
   @Column({ 

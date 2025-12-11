@@ -1,8 +1,10 @@
 import { ObjectType, Field, Float, registerEnumType } from '@nestjs/graphql';
 import { Entity, Column, ManyToOne, JoinColumn, RelationId } from 'typeorm';
-import { BaseEntity } from '../../common/entities/base.entity';
+
 import { Wallet } from './wallet.entity';
 import { Order } from '../../orders/entities/order.entity';
+import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
+import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
 
 export enum TransactionType {
   DEPOSIT = 'DEPOSIT',
@@ -16,7 +18,8 @@ registerEnumType(TransactionType, { name: 'TransactionType' });
 
 @ObjectType()
 @Entity('wallet_transactions')
-export class WalletTransaction extends BaseEntity {
+@GeneratePermissions()
+export class WalletTransaction extends AppBaseEntity {
   @Field(() => Float)
   @Column({
     type: 'bigint',

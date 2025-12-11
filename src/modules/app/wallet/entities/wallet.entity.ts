@@ -1,12 +1,14 @@
 import { ObjectType, Field, Float } from '@nestjs/graphql';
 import { Entity, Column, OneToOne, JoinColumn, OneToMany } from 'typeorm';
-import { BaseEntity } from '../../common/entities/base.entity';
-import { User } from '../../users/entities/user.entity';
 import { WalletTransaction } from './wallet-transaction.entity';
+import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
+import { User } from '../../auth-base/user/entities/user.entity';
+import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
 
 @ObjectType()
 @Entity('wallets')
-export class Wallet extends BaseEntity {
+@GeneratePermissions()
+export class Wallet extends AppBaseEntity {
   @Field(() => Float)
   @Column({
     type: 'bigint',

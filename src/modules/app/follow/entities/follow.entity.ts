@@ -7,14 +7,16 @@ import {
   Index,
   RelationId,
 } from 'typeorm'; 
-import { BaseEntity } from '../../common/entities/base.entity';
-import { User } from '../../users/entities/user.entity';
-import { Vendor } from 'src/vendors/entities/vendor.entity';
+
+import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
+import { User } from '../../auth-base/user/entities/user.entity';
+import { Vendor } from '../../vendors/entities/vendor.entity';
 
 @ObjectType()
 @Entity('follows')
 @Unique(['follower', 'vendor'])
-export class Follow extends BaseEntity {
+
+export class Follow extends AppBaseEntity {
   @Index()
   @Field(() => User)
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
