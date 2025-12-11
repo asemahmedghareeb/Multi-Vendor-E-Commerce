@@ -11,7 +11,6 @@ import { UserRoleEnum } from 'src/common/enums/user-role.enum';
 import { AuthHelperService } from 'src/modules/core/app-helper/services/auth-helper.service';
 import { ManualRegisterWithPasswordInput } from '../../auth/dtos/inputs/manual-register-user-with-password.input';
 import { UserVerificationCodeService } from './user-verification-code.service';
-import { VerificationCodeUseCaseEnum } from '../enums/verification-code-use-case.enum';
 import { SocialRegisterUserInput } from '../../auth/dtos/inputs/social-register-user.input';
 import { LessThan } from 'typeorm';
 import { UpdateUserInfo } from '../dtos/inputs/update-user-info.input';

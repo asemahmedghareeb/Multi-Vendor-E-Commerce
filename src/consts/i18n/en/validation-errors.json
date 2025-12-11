@@ -1,3 +1,12 @@
 {
-    "TEST_INPUT_MAX_LENGTH" : "length can't be more than 2"
+  "TEST_INPUT_MAX_LENGTH": "length can't be more than 2",
+  "IS_UUID": "Field {property} must be a valid UUID",
+  "NOT_EMPTY": "Field {property} cannot be empty",
+  "IS_STRING": "Field {property} must be a string",
+  "IS_INT": "Field {property} must be an integer",
+  "IS_NUMBER": "Field {property} must be a number",
+  "IS_EMAIL": "Field {property} must be a valid email address",
+  "IS_ARRAY": "Field {property} must be an array",
+  "MIN": "Field {property} must be at least {constraint1}",
+  "MAX": "Field {property} must not exceed {constraint1}"
 }

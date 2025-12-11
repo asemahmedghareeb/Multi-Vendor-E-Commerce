@@ -1,3 +1,12 @@
 export enum ValidationErrorMessageEnum {
   TEST_INPUT_MAX_LENGTH = 'TEST_INPUT_MAX_LENGTH',
+  IS_UUID = 'IS_UUID',
+  NOT_EMPTY = 'NOT_EMPTY',
+  IS_STRING = 'IS_STRING',
+  IS_INT = 'IS_INT',
+  IS_NUMBER = 'IS_NUMBER',
+  IS_EMAIL='IS_EMAIL',
+  IS_ARRAY='IS_ARRAY',
+  MIN='MIN',
+  MAX='MAX',
 }

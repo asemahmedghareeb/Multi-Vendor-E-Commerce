@@ -36,6 +36,8 @@ import { MoneyScalar } from './common/scalars/money.scalar';
 import { MonitoringModule } from './modules/core/monitoring/monitoring.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { cacheConfigFactory } from './config/cache/cache.config';
+import { CartModule } from './modules/app/cart/cart.module';
+import { ProductModule } from './modules/app/product/product.module';
 
 @Module({
   imports: [
@@ -76,7 +78,9 @@ import { cacheConfigFactory } from './config/cache/cache.config';
     AppJwtModule,
     AppHelperModule,
     AppCheckModule,
-    AutoModuleLoaderModule.register(), // todo remove if u want modules to be not auto loaded
+    AutoModuleLoaderModule.register(),
+    CartModule,
+    ProductModule, // todo remove if u want modules to be not auto loaded
   ],
   controllers: [AppController],
   providers: [

@@ -66,6 +66,8 @@
   "BLOG_CATEGORY_ALREADY_EXIST": "Blog category already exist",
   "BLOG_CATEGORY_DOES_NOT_EXIST": "Blog category does not exist",
   "TAG_DOES_NOT_EXIST": "Tag does not exist",
+  "INSUFFICIENT_INVENTORY": "Insufficient inventory, only {{count}} items available",
+  "PRODUCT_DOES_NOT_EXIST": "Product does not exist",
   "EXPIRED_ACCESS_TOKEN": "Expired access token",
   "PASSWORD_RESET_REQUIRED": "The user is required to change his password",
   "PROFILE_COMPLETION_REQUIRED": "this user is required to complete his profile",
