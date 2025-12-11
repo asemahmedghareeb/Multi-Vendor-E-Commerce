@@ -1,0 +1,7 @@
+{
+  "VERIFY_USER_EMAIL": "رمز التحقق الخاص بـ : {appName}",
+  "RESET_USER_PASSWORD": "رمز التحقق الخاص بـ {appName}",
+  "LOGIN_USER_WITH_VERIFICATION_CODE": "رمز التحقق الخاص بـ {appName}",
+  "UPDATE_EMAIL_VERIFICATION_CODE" : "رمز التحقق الخاص بـ : {appName}"
+
+}

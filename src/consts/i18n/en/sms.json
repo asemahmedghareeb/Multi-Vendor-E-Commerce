@@ -1,0 +1,7 @@
+{
+  "HELLO_MESSAGE": "Hello {name}",
+  "PHONE_VERIFICATION_CODE": "Your verification code is {code}.\nEnter this code in the app to verify your phone number.",
+  "RESET_PASSWORD_CODE": "Your verification code is {code}.\nEnter this code in the app to reset your password.",
+  "LOGIN_VERIFICATION_CODE": "Your verification code is {code}.\nEnter this code in the app to verify login.",
+  "UPDATE_PHONE_NUMBER" : "Your verification code is {code}.\nEnter this code in the app to verify your phone number."
+}

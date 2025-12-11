@@ -1,0 +1,26 @@
+image: node:12.18.4
+pipelines:
+  branches:
+    staging:
+      - step:
+          name: Deploy to Dev server
+          deployment: staging
+          script:
+            - pipe: atlassian/ssh-run:0.2.2
+              variables:
+                SSH_USER: $DEPLOY_USER
+                SERVER: $DEPLOY_HOST
+                MODE: 'command'
+                COMMAND: 'cd /var/www/workshops/codebase && git stash && git pull origin staging && n 22 && npm i && npm run build && pm2 restart codebase'
+
+    main:
+      - step:
+          name: Deploy to Prod server
+          deployment: staging
+          script:
+            - pipe: atlassian/ssh-run:0.2.2
+              variables:
+                SSH_USER: $DEPLOY_USER
+                SERVER: $DEPLOY_CORE_HOST
+                MODE: 'command'
+                COMMAND: 'cd /var/www/baianat/codebase && git stash && git pull origin main && n 22 && npm i && npm run build && pm2 restart codebase'

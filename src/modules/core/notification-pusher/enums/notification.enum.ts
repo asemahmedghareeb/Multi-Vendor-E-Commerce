@@ -1,0 +1,3 @@
+export enum NotificationEnum {
+    WELCOME_NOTIFICATION = "WELCOME_WELCOME_NOTIFICATION"
+}

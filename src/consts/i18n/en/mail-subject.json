@@ -1,0 +1,6 @@
+{
+  "VERIFY_USER_EMAIL": "Your {appName} verification",
+  "RESET_USER_PASSWORD": "Your {appName} verification code",
+  "LOGIN_USER_WITH_VERIFICATION_CODE": "Your {appName} verification code",
+  "UPDATE_EMAIL_VERIFICATION_CODE" : "Your {appName} update email verification code"
+}

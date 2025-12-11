@@ -1,0 +1,6 @@
+{
+    "WELCOME_WELCOME_NOTIFICATION" : {
+        "title" : "مرحبا",
+        "body" : "مرحبا {name}"
+    }
+}
