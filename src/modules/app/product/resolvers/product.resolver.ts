@@ -1,34 +1,45 @@
-import { VendorLoader } from '../dataLoaders/vendor.loader';
+// import { VendorLoader } from '../dataLoaders/vendor.loader';
 import { Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { Mutation, Args } from '@nestjs/graphql';
 
-import { CategoryLoader } from 'src/dataLoaders/category.loader';
+// import { CategoryLoader } from 'src/dataLoaders/category.loader';
 import { Product } from '../entities/product.entity';
 import { ProductService } from '../services/product.service';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { CreateProductInput } from '../dto/inputs/create-product.input';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { NullablePaginatorArgsInput, PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
+import {
+  NullablePaginatorArgsInput,
+  PaginatorInput,
+} from 'src/common/dtos/inputs/paginator.input';
 import { GetProductsFilterInput } from '../dto/inputs/product-filter.input';
 import { UpdateProductInput } from '../dto/inputs/Update-product-Input';
-import { paginatedObjectTypeFactory } from 'src/common/utilities/object-paginated-type.factory';
 import { ProductPaginated } from '../dto/responses/paginated-products';
 import { Vendor } from '../../vendors/entities/vendor.entity';
 import { Category } from '../../categories/entities/category.entity';
 import { User } from '../../auth-base/user/entities/user.entity';
-
-
+import { DefaultPermissionActionsEnum } from 'src/common/enums/default-permissions.enum';
+import { Transactional } from 'typeorm-transactional';
 
 @Resolver(() => Product)
 export class ProductsResolver {
   constructor(
     private readonly productService: ProductService,
-    private readonly vendorLoader: VendorLoader,
-    private readonly categoryLoader: CategoryLoader,
+    // private readonly guardHelperService: GuardHelperService,
+    // private readonly vendorLoader: VendorLoader,
+    // private readonly categoryLoader: CategoryLoader,
   ) {}
 
+  @Auth({
+    permissions: [
+      {
+        action: DefaultPermissionActionsEnum.CREATE,
+        target: Product.permissionsTarget,
+      },
+    ],
+  })
   @Mutation(() => Product)
-  @Auth()
+  @Transactional()
   async createProduct(
     @Args('createProductInput') createProductInput: CreateProductInput,
     @CurrentUser() user: User,
@@ -47,6 +58,7 @@ export class ProductsResolver {
     return this.productService.getUserFeed(user, input);
   }
 
+  @Auth()
   @Query(() => ProductPaginated)
   async products(
     @Args('filter', { nullable: true }) filter?: GetProductsFilterInput,
@@ -55,22 +67,40 @@ export class ProductsResolver {
     return this.productService.findAll(input);
   }
 
+  @Auth()
   @Query(() => Product)
   async product(@Args('id', { type: () => String }) id: string) {
     return this.productService.findOne(id);
   }
 
+  @Auth({
+    permissions: [
+      {
+        action: DefaultPermissionActionsEnum.UPDATE,
+        target: Product.permissionsTarget,
+      },
+    ],
+  })
   @Mutation(() => Product)
   @Auth()
+  @Transactional()
   async updateProduct(
     @Args('updateProductInput') updateProductInput: UpdateProductInput,
     @CurrentUser() user: User,
   ) {
-    return this.productService.update(user.id, user.role, updateProductInput);
+    return this.productService.update(user.id, updateProductInput);
   }
 
+  @Auth({
+    permissions: [
+      {
+        action: DefaultPermissionActionsEnum.DELETE,
+        target: Product.permissionsTarget,
+      },
+    ],
+  })
   @Mutation(() => Boolean)
-  @Auth()
+  @Transactional()
   async removeProduct(
     @Args('id', { type: () => String }) id: string,
     @CurrentUser() user: User,
@@ -78,15 +108,15 @@ export class ProductsResolver {
     return this.productService.remove(user.id, user.role, id);
   }
 
-  @ResolveField(() => Vendor)
-  async vendor(@Parent() product: Product) {
-    if (product.vendor) return product.vendor;
-    return this.vendorLoader.batchVendors.load(product.vendorId);
-  }
+  // @ResolveField(() => Vendor)
+  // async vendor(@Parent() product: Product) {
+  //   if (product.vendor) return product.vendor;
+  //   return this.vendorLoader.batchVendors.load(product.vendorId);
+  // }
 
-  @ResolveField(() => Category)
-  async category(@Parent() product: Product) {
-    if (product.category) return product.category;
-    return this.categoryLoader.batchCategories.load(product.categoryId);
-  }
+  // @ResolveField(() => Category)
+  // async category(@Parent() product: Product) {
+  //   if (product.category) return product.category;
+  //   return this.categoryLoader.batchCategories.load(product.categoryId);
+  // }
 }

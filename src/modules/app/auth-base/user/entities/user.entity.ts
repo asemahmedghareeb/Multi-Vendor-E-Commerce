@@ -18,6 +18,8 @@ import { SocialAccount } from '../../social-auth/entities/social-account.entity'
 import { AppJwtToken } from 'src/common/types/app-jwt-token.type';
 import { AdminGroup } from '../../admin-group/entities/admin-group.entity';
 import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
+import { Vendor } from 'src/modules/app/vendors/entities/vendor.entity';
+
 
 @Entity()
 @ObjectType()
@@ -125,4 +127,7 @@ export class User extends AppBaseEntity {
   })
   @JoinColumn({ name: 'adminGroupId' })
   adminGroup: AdminGroup;
+
+  @OneToOne(() => Vendor, (vendor) => vendor.user)
+  vendorProfile: Vendor;
 }

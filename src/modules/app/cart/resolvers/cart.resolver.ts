@@ -16,7 +16,8 @@ import { UpdateCartItemInput } from '../dto/inputs/update-cart-item-input';
 import { CartService } from '../services/cart.service';
 import { User } from '../../auth-base/user/entities/user.entity';
 import { Product } from '../../product/entities/product.entity';
-import { ProductByIdDataloader } from '../../product/dataloaders/product.dataloader';
+import { Transactional } from 'typeorm-transactional';
+// import { ProductByIdDataloader } from '../../product/dataloaders/product.dataloader';
 
 @Resolver(() => Cart)
 export class CartResolver {
@@ -30,6 +31,7 @@ export class CartResolver {
 
   @Auth()
   @Mutation(() => Cart)
+  @Transactional()
   async addToCart(
     @Args('input') input: AddToCartInput,
     @CurrentUser() user: User,
@@ -39,6 +41,7 @@ export class CartResolver {
 
   @Auth()
   @Mutation(() => Cart)
+  @Transactional()
   async updateCartItem(
     @Args('input') input: UpdateCartItemInput,
     @CurrentUser() user: User,
@@ -48,6 +51,7 @@ export class CartResolver {
 
   @Auth()
   @Mutation(() => Cart)
+  @Transactional()
   async removeFromCart(
     @Args('cartItemId') cartItemId: string,
     @CurrentUser() user: User,
@@ -58,12 +62,12 @@ export class CartResolver {
 
 @Resolver(() => CartItem)
 export class CartItemResolver {
-  constructor(private readonly productLoader: ProductByIdDataloader) {}
+  // constructor(private readonly productLoader: ProductByIdDataloader) {}
 
-  @ResolveField(() => Product)
-  async product(@Parent() cartItem: CartItem) {
-    if (cartItem.product) return cartItem.product;
-    if (!cartItem.productId) return null;
-    return this.productLoader.getDataloader().load(cartItem.productId);
-  }
+  // @ResolveField(() => Product)
+  // async product(@Parent() cartItem: CartItem) {
+  //   if (cartItem.product) return cartItem.product;
+  //   if (!cartItem.productId) return null;
+  //   return this.productLoader.getDataloader().load(cartItem.productId);
+  // }
 }

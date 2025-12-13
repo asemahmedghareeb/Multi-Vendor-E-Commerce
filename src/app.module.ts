@@ -39,6 +39,24 @@ import { cacheConfigFactory } from './config/cache/cache.config';
 import { CartModule } from './modules/app/cart/cart.module';
 import { ProductModule } from './modules/app/product/product.module';
 
+import { UserModule } from './modules/app/auth-base/user/user.module';
+import { AuthModule } from './modules/app/auth-base/auth/auth.module';
+import { PaymentModule } from './modules/core/payment/payment.module';
+// import { OrdersModule } from './modules/app/orders/orders.module';
+// import { WalletModule } from './modules/app/wallet/wallet.module';
+import { ReviewsModule } from './modules/app/reviews/reviews.module';
+import { FollowModule } from './modules/app/follow/follow.module';
+import { CategoriesModule } from './modules/app/categories/categories.module';
+import { WishlistModule } from './modules/app/wishlist/wishlist.module';
+import { AgoraModule } from './modules/app/agora/agora.module';
+import { adminGroupModule } from './modules/app/auth-base/admin-group/admin-group.module';
+import { BlogModule } from './modules/app/blog/blog.module';
+import { ContentModule } from './modules/app/content/content.module';
+import { NotificationModule } from './modules/app/notification/notification.module';
+import { RegionModule } from './modules/app/region/region.module';
+import { testModule } from './modules/app/test-module/test.module';
+import { VendorsModule } from './modules/app/vendors/vendors.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -78,9 +96,25 @@ import { ProductModule } from './modules/app/product/product.module';
     AppJwtModule,
     AppHelperModule,
     AppCheckModule,
-    AutoModuleLoaderModule.register(),
     CartModule,
-    ProductModule, // todo remove if u want modules to be not auto loaded
+    ProductModule,
+    AuthModule,
+    PaymentModule,
+    VendorsModule,
+    UserModule,
+    // OrdersModule,
+    // WalletModule,
+    ReviewsModule,
+    FollowModule,
+    CategoriesModule,
+    WishlistModule,
+    AgoraModule,
+    adminGroupModule,
+    BlogModule,
+    ContentModule,
+    NotificationModule,
+    RegionModule,
+    // AutoModuleLoaderModule.register(), // todo remove if u want modules to be not auto loaded
   ],
   controllers: [AppController],
   providers: [

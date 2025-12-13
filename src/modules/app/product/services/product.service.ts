@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   Between,
   FindOptionsWhere,
@@ -10,8 +6,6 @@ import {
   LessThanOrEqual,
   MoreThanOrEqual,
 } from 'typeorm';
-
-import { UserRoleEnum } from 'src/common/enums/user-role.enum';
 import { InjectAppRepository } from 'src/common/decorators/inject-app-repository.decorator';
 import { AppRepository } from 'src/modules/core/app-database/repositories/app.repository';
 import { Product } from '../entities/product.entity';
@@ -25,6 +19,7 @@ import { Follow } from '../../follow/entities/follow.entity';
 import { GetProductsFilterInput } from '../dto/inputs/product-filter.input';
 import { AppHttpException } from 'src/common/exceptions/app-http.exception';
 import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
+import { VendorStatus } from '../../vendors/enums/vendor-status.enum';
 @Injectable()
 export class ProductService {
   constructor(
@@ -37,20 +32,17 @@ export class ProductService {
   ) {}
 
   async create(userId: string, input: CreateProductInput): Promise<Product> {
-    const vendor = await this.vendorRepo.findOne({
+    const vendor = await this.vendorRepo.findOneOrFail({
       where: { user: { id: userId } },
     });
 
-    if (!vendor) {
-      throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
-    }
+    if(vendor.status !== VendorStatus.VERIFIED)
+    throw new AppHttpException(ErrorCodeEnum.FORBIDDEN);
 
-    const category = await this.categoryRepo.findOne({
+  
+    const category = await this.categoryRepo.findOneOrFail({
       where: { id: input.categoryId!.toString() },
     });
-    if (!category) {
-      throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
-    }
 
     const product = this.productRepo.create({
       ...input,
@@ -159,20 +151,15 @@ export class ProductService {
     return product;
   }
 
-  async update(
-    userId: string,
-    userRole: string,
-    input: UpdateProductInput,
-  ): Promise<Product> {
-    const product: Product | null = await this.findOne(input.id);
-    if (!product)  throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
-    await this.checkOwnership(product, userId, userRole);
+  async update(userId: string, input: UpdateProductInput): Promise<Product> {
+    const product= await this.productRepo.findOneOrFail({where:{id:input.id}});
+    await this.checkOwnership(product, userId);
 
     if (input.categoryId) {
       const category = await this.categoryRepo.findOne({
         where: { id: input.categoryId },
       });
-      if (!category)  throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
+      if (!category) throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
       product.category = category;
     }
 
@@ -190,22 +177,14 @@ export class ProductService {
   }
 
   async remove(userId: string, userRole: string, id: string): Promise<boolean> {
-    const product: Product | null = await this.findOne(id);
-
-    if (!product)  throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
-    await this.checkOwnership(product, userId, userRole);
+    const product = await this.productRepo.findOneOrFail({where:{id}});
+    await this.checkOwnership(product, userId);
 
     await this.productRepo.remove(product);
     return true;
   }
 
-  private async checkOwnership(
-    product: Product,
-    userId: string,
-    userRole: string,
-  ) {
-    if (userRole === UserRoleEnum.SUPER_ADMIN) return;
-
+  private async checkOwnership(product: Product, userId: string) {
     const vendorProfile = await this.vendorRepo.findOne({
       where: { user: { id: userId } },
     });

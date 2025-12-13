@@ -10,7 +10,6 @@ import { ErrorCodeEnum } from '../enums/error-code.enum';
 import { GuardHelperService } from 'src/modules/core/app-helper/services/guard-helper.service';
 import { PermissionOptions } from '../types/allowed-permission.type';
 import { ALLOW_USERS_WITH_REQUIRE_SETTING_PASSWORD } from '../decorators/allow-users-with-require-setting-password.decorator';
-import { AppJwtConfig } from 'src/config/app-jwt/app-jwt.config';
 import { ALLOW_USERS_WITH_REQUIRE_COMPLETE_PROFILE_INFO } from '../decorators/all-users-with-require-complete-profile-info.decorator';
 
 @Injectable()

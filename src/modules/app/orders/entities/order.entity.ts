@@ -5,7 +5,7 @@ import { OrderItem } from './order-item.entity';
 import { OrderStatus } from '../enum/order-status.enum';
 import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
 import { User } from '../../auth-base/user/entities/user.entity';
-import { Payment } from '../../payments/entities/payment.entity';
+
 import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
 
 
@@ -48,7 +48,7 @@ export class Order extends AppBaseEntity {
   items: OrderItem[];
 
 
-  @Field(() => Payment, { nullable: true })
-  @OneToOne(() => Payment, (payment) => payment.order)
-  payment: Payment;
+//   @Field(() => Payment, { nullable: true })
+//   @OneToOne(() => Payment, (payment) => payment.order)
+//   payment: Payment;
 }
