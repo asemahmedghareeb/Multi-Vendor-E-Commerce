@@ -2,5 +2,7 @@
   "VERIFY_USER_EMAIL": "Your {appName} verification",
   "RESET_USER_PASSWORD": "Your {appName} verification code",
   "LOGIN_USER_WITH_VERIFICATION_CODE": "Your {appName} verification code",
-  "UPDATE_EMAIL_VERIFICATION_CODE" : "Your {appName} update email verification code"
+  "UPDATE_EMAIL_VERIFICATION_CODE" : "Your {appName} update email verification code",
+  "VENDOR_APPROVAL": "Your Vendor Account has been Approved",
+  "VENDOR_REJECTION": "Your Vendor Account has been Rejected"
 }

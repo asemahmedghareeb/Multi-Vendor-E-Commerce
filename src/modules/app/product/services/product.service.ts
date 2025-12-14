@@ -32,17 +32,29 @@ export class ProductService {
   ) {}
 
   async create(userId: string, input: CreateProductInput): Promise<Product> {
-    const vendor = await this.vendorRepo.findOneOrFail({
-      where: { user: { id: userId } },
-    });
+    const vendor = await this.vendorRepo.findOneOrFail(
+      {
+        where: { user: { id: userId } },
+      },
+      ErrorCodeEnum.VENDOR_NOT_FOUND,
+    );
 
-    if(vendor.status !== VendorStatus.VERIFIED)
-    throw new AppHttpException(ErrorCodeEnum.FORBIDDEN);
+    if (vendor.status !== VendorStatus.VERIFIED)
+      throw new AppHttpException(ErrorCodeEnum.FORBIDDEN);
 
-  
-    const category = await this.categoryRepo.findOneOrFail({
-      where: { id: input.categoryId!.toString() },
-    });
+    const category = await this.categoryRepo.findOneOrFail(
+      {
+        where: { id: input.categoryId!.toString() },
+      },
+      ErrorCodeEnum.CATEGORY_DOES_NOT_EXIST,
+    );
+
+    await this.productRepo.findOneAndFail(
+      {
+        where: { name: input.name, vendor: { id: vendor.id } },
+      },
+      ErrorCodeEnum.PRODUCT_ALREADY_EXISTS,
+    );
 
     const product = this.productRepo.create({
       ...input,
@@ -69,7 +81,7 @@ export class ProductService {
 
     qb.where('follow.follower_id = :userId', { userId });
 
-    qb.leftJoinAndSelect('product.vendor', 'vendor');
+    // qb.leftJoinAndSelect('product.vendor', 'vendor');
 
     qb.orderBy('product.createdAt', 'DESC');
     qb.skip(skip).take(limit);
@@ -141,20 +153,22 @@ export class ProductService {
   }
 
   async findOne(id: string): Promise<Product | null> {
-    const product: Product | null = await this.productRepo.findOne({
-      where: { id },
-    });
+    const product = this.productRepo.findOneOrFail(
+      {
+        where: { id },
+      },
+      ErrorCodeEnum.PRODUCT_DOES_NOT_EXIST,
+    );
 
-    if (!product) {
-      throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
-    }
     return product;
   }
 
   async update(userId: string, input: UpdateProductInput): Promise<Product> {
-    const product= await this.productRepo.findOneOrFail({where:{id:input.id}});
+    const product = await this.productRepo.findOneOrFail({
+      where: { id: input.id },
+    });
     await this.checkOwnership(product, userId);
-
+    
     if (input.categoryId) {
       const category = await this.categoryRepo.findOne({
         where: { id: input.categoryId },
@@ -176,8 +190,8 @@ export class ProductService {
     return this.productRepo.save(product);
   }
 
-  async remove(userId: string, userRole: string, id: string): Promise<boolean> {
-    const product = await this.productRepo.findOneOrFail({where:{id}});
+  async remove(userId: string, id: string): Promise<boolean> {
+    const product = await this.productRepo.findOneOrFail({ where: { id } });
     await this.checkOwnership(product, userId);
 
     await this.productRepo.remove(product);

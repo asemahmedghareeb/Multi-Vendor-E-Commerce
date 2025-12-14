@@ -104,7 +104,7 @@ export class NotificationService {
 
     return true;
   }
-
+  
   async getUserNotifications(user: User, paginationInput?: PaginatorInput) {
     const notificationReceivers =
       await this.notificationReceiverRepository.findPaginated(

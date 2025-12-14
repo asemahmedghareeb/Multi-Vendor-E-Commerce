@@ -71,5 +71,9 @@
   "EXPIRED_ACCESS_TOKEN": "انتهت صلاحية رمز الوصول",
   "PASSWORD_RESET_REQUIRED": "يجب على المستخدم إعادة تعيين كلمة المرور الخاصة به",
   "PROFILE_COMPLETION_REQUIRED": "هذا المستخدم ملزم بإكمال ملفه الشخصي",
-  "EMAIL_MISMATCH": "البريد الالكتروني غير متطابق"
+  "EMAIL_MISMATCH": "البريد الالكتروني غير متطابق",
+  "PRODUCT_ALREADY_EXISTS": "المنتج موجود بالفعل",
+  "CATEGORY_ALREADY_EXISTS": "التصنيف موجود بالفعل",
+  "CATEGORY_DOES_NOT_EXIST": "التصنيف غير موجود",
+  "VENDOR_NOT_FOUND": "التاجر موجود بالفعل"
 }

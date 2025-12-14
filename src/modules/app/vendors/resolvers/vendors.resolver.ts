@@ -22,6 +22,7 @@ import { VendorStatus } from '../enums/vendor-status.enum';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { RequestVendorInput } from '../dtos/inputs/request-vendor.input';
 import { Transactional } from 'typeorm-transactional';
+import { Review } from '../../reviews/entities/review.entity';
 
 @Resolver(() => Vendor)
 export class UsersResolver {
@@ -54,7 +55,6 @@ export class UsersResolver {
   @Transactional()
   @Mutation(() => Vendor)
   async approveVendor(@Args('userId') userId: string) {
-    console.log(userId);
     return this.vendorService.updateVendorStatus(userId, VendorStatus.VERIFIED);
   }
 

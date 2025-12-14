@@ -48,7 +48,8 @@ export class Product extends AppBaseEntity {
   @JoinColumn({ name: 'vendorId' })
   vendor: Vendor;
 
-  @RelationId((product: Product) => product.vendor)
+
+  @Column()
   vendorId: string;
 
   @Field(() => Category)
@@ -56,6 +57,6 @@ export class Product extends AppBaseEntity {
   @JoinColumn({ name: 'categoryId' })
   category: Category;
 
-  @RelationId((product: Product) => product.category)
+  @Column()
   categoryId: string;
 }

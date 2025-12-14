@@ -58,10 +58,15 @@ export class AppHelperService {
   }
 
   localize(key: string, context: {}, lang?: LangEnum) {
-    const localized = this.i18nService.t(key, {
+    const x = {
       args: context,
-      lang,
-    }) as string;
+    };
+    if (lang) {
+      // @ts-ignore
+      x.lang = lang;
+    }
+    
+    const localized = this.i18nService.t(key, x) as string;
 
     if (lang == LangEnum.AR) return this.serializeArabic(localized);
     return localized;

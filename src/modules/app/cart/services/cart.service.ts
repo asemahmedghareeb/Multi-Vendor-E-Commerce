@@ -1,6 +1,4 @@
-import {
-  Injectable,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { User } from '../../auth-base/user/entities/user.entity';
 import { Cart } from '../entities/cart.entity';
 import { CartItem } from '../entities/cart-item.entity';
@@ -24,9 +22,11 @@ export class CartService {
   async getCart(userId: string): Promise<Cart> {
     let cart = await this.cartRepo.findOne({
       where: { user: { id: userId } },
-      relations: ['items', 'user', 'items.product', 'items.product.vendor'],
+      // relations: ['items', 'user', 'items.product', 'items.product.vendor'],
+      relations: ['items', 'user'],
       order: { items: { createdAt: 'ASC' } },
     });
+    
 
     if (!cart) {
       const user = await this.userRepo.findOne({ where: { id: userId } });
@@ -42,6 +42,7 @@ export class CartService {
     return cart;
   }
 
+  
   async addToCart(user: User, input: AddToCartInput): Promise<Cart> {
     const userId = user.id;
     let cart = await this.cartRepo.findOne({
@@ -62,13 +63,9 @@ export class CartService {
       await this.cartRepo.save(cart);
     }
 
-    const product = await this.productRepo.findOne({
+    const product = await this.productRepo.findOneOrFail({
       where: { id: input.productId },
     });
-
-    if (!product) {
-       throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
-    }
 
     let cartItem = cart.items.find(
       (item) => item.product.id === input.productId,
@@ -116,20 +113,16 @@ export class CartService {
     const userId = user.id;
     const cart = await this.getCart(userId);
 
-    const cartItem = await this.cartItemRepo.findOne({
+    const cartItem = await this.cartItemRepo.findOneOrFail({
       where: { id: input.cartItemId, cart: { id: cart.id } },
       relations: ['product'],
     });
 
-    if (!cartItem) {
-       throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
+    if (cartItem.product.inventoryCount < input.quantity) {
+      throw new AppHttpException(ErrorCodeEnum.INSUFFICIENT_INVENTORY, {
+        count: cartItem.product.inventoryCount,
+      });
     }
-
-         if (cartItem.product.inventoryCount < input.quantity) {
-           throw new AppHttpException(ErrorCodeEnum.INSUFFICIENT_INVENTORY, {
-             count: cartItem.product.inventoryCount,
-           });
-         }
     cartItem.quantity = input.quantity;
     await this.cartItemRepo.save(cartItem);
     return this.getCart(userId);
@@ -145,7 +138,7 @@ export class CartService {
     });
 
     if (result.affected === 0)
-       throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
+      throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
 
     return this.getCart(userId);
   }

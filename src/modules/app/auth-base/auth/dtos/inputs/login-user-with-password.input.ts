@@ -8,7 +8,7 @@ export class LoginUserWithPasswordInput {
   @IsString()
   @IsNotEmpty()
   emailOrPhoneNumber: string;
-
+ 
   @Field()
   @IsString()
   @IsNotEmpty()

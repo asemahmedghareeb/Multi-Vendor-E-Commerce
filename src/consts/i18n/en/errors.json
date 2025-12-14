@@ -71,5 +71,9 @@
   "EXPIRED_ACCESS_TOKEN": "Expired access token",
   "PASSWORD_RESET_REQUIRED": "The user is required to change his password",
   "PROFILE_COMPLETION_REQUIRED": "this user is required to complete his profile",
-  "EMAIL_MISMATCH" : "Email mismatch"
+  "EMAIL_MISMATCH": "Email mismatch",
+  "PRODUCT_ALREADY_EXISTS": "Product already exists",
+  "CATEGORY_ALREADY_EXISTS": "Category already exists",
+  "CATEGORY_DOES_NOT_EXIST": "Category does not exist",
+  "VENDOR_NOT_FOUND": "Vendor not found"
 }

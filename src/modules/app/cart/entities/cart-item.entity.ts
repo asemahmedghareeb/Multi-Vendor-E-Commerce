@@ -14,19 +14,19 @@ export class CartItem extends AppBaseEntity {
   @Column({ type: 'int', default: 1 })
   quantity: number;
 
+  @Field(() => Cart)
   @ManyToOne(() => Cart, (cart) => cart.items, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'cart_id' })
   cart: Cart;
 
-  @RelationId((item: CartItem) => item.cart)
-  cartId: string;
+  @Column()
+  cart_id: string;
 
   @Field(() => Product)
   @ManyToOne(() => Product, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'product_id' })
   product: Product;
 
-  @Field()
-  @RelationId((item: CartItem) => item.product)
-  productId: string;
+  @Column()
+  product_id: string;
 }

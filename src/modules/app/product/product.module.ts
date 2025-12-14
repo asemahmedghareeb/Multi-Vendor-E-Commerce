@@ -2,22 +2,19 @@ import { Module } from '@nestjs/common';
 import { ProductService } from './services/product.service';
 import { Product } from './entities/product.entity';
 import { ProductsResolver } from './resolvers/product.resolver';
-// import {
-//   ProductByIdDataloader,
-//   ProductsByVendorIdDataloader,
-// } from './dataloaders/product.dataloader';
 import { Vendor } from '../vendors/entities/vendor.entity';
 import { Category } from '../categories/entities/category.entity';
 import { AppDatabaseModule } from 'src/modules/core/app-database/app-database.module';
+import { VendorDataloader } from './dataloaders/vendor.dataloader';
+import { CategoryLoader } from './dataloaders/category.dataloader';
 
 @Module({
   imports: [AppDatabaseModule.forFeature([Product, Vendor, Category])],
   providers: [
     ProductsResolver,
     ProductService,
-    // ProductByIdDataloader,
-    // ProductByIdDataloader,
+    VendorDataloader,
+    CategoryLoader,
   ],
-  // exports: [ProductByIdDataloader, ProductsByVendorIdDataloader],
 })
 export class ProductModule {}

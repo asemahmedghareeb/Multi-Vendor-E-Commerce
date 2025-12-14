@@ -61,7 +61,7 @@ export class Vendor extends AppBaseEntity {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @RelationId((vendor: Vendor) => vendor.user)
+  @Column()
   userId: string;
 
   @OneToMany(() => Product, (product) => product.vendor)

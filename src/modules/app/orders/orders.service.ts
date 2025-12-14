@@ -7,21 +7,21 @@
 // import { Order } from './entities/order.entity';
 // import { OrderItem } from './entities/order-item.entity';
 // import { CreateOrderInput } from './dto/create-order.input';
-// import { User } from '../users/entities/user.entity';
 // import { Repository } from 'typeorm';
 // import { CartItem } from '../cart/entities/cart-item.entity';
-// import { Product } from '../products/entities/product.entity';
 // import { InjectRepository } from '@nestjs/typeorm';
 // import { Transactional } from 'typeorm-transactional';
 // import { OrderStatus } from './enum/order-status.enum';
-// import { PaymentsService } from 'src/payments/payments.service';
+// // import { PaymentsService } from 'src/payments/payments.service';
 // import { OrderTracking } from './entities/order-tracking.entity';
-// import { Cart } from 'src/cart/entities/cart.entity';
-// import { Vendor } from 'src/vendors/entities/vendor.entity';
-// import { PaginationInput } from 'src/common/dto/pagination.input';
-// import { IPaginatedType } from 'src/common/dto/paginated-output';
-// import { Device } from 'src/users/entities/device.entity';
-// import { FcmService } from 'src/fcm/fcm.service';
+
+
+// import { User } from '../auth-base/user/entities/user.entity';
+// import { Cart } from '../cart/entities/cart.entity';
+// import { Vendor } from '../vendors/entities/vendor.entity';
+// import { Product } from '../product/entities/product.entity';
+
+
 
 // @Injectable()
 // export class OrdersService {
@@ -44,10 +44,7 @@
 //     private readonly trackingRepo: Repository<OrderTracking>,
 //     @InjectRepository(Cart)
 //     private readonly cartRepo: Repository<Cart>,
-//     @InjectRepository(Device)
-//     private readonly deviceRepo: Repository<Device>,
 //     private readonly paymentsService: PaymentsService,
-//     private readonly fcmService: FcmService,
 //   ) {}
 
 //   async findAllOrders(

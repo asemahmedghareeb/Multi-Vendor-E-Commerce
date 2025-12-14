@@ -1,6 +1,5 @@
 import { config } from 'dotenv';
 config();
-
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { initializeTransactionalContext } from 'typeorm-transactional';
@@ -32,7 +31,9 @@ async function bootstrap() {
 
   // app.use('/payment/webhook/stripe', express.raw({ type: 'application/json' }));
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3000,() => 
+    console.log(`Server ready at http://localhost:${process.env.PORT ?? 3000}/graphql`)
+  );
 }
 
 bootstrap();

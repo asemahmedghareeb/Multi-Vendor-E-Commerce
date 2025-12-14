@@ -17,8 +17,7 @@ import { CartService } from '../services/cart.service';
 import { User } from '../../auth-base/user/entities/user.entity';
 import { Product } from '../../product/entities/product.entity';
 import { Transactional } from 'typeorm-transactional';
-// import { ProductByIdDataloader } from '../../product/dataloaders/product.dataloader';
-
+import { ProductsDataloader } from '../dataloaders/product.dataloader';
 @Resolver(() => Cart)
 export class CartResolver {
   constructor(private readonly cartService: CartService) {}
@@ -38,7 +37,7 @@ export class CartResolver {
   ) {
     return this.cartService.addToCart(user, input);
   }
-
+ 
   @Auth()
   @Mutation(() => Cart)
   @Transactional()
@@ -60,14 +59,3 @@ export class CartResolver {
   }
 }
 
-@Resolver(() => CartItem)
-export class CartItemResolver {
-  // constructor(private readonly productLoader: ProductByIdDataloader) {}
-
-  // @ResolveField(() => Product)
-  // async product(@Parent() cartItem: CartItem) {
-  //   if (cartItem.product) return cartItem.product;
-  //   if (!cartItem.productId) return null;
-  //   return this.productLoader.getDataloader().load(cartItem.productId);
-  // }
-}
