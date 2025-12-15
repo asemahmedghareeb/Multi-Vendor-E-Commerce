@@ -30,6 +30,16 @@ export class OrderItemResolver {
     private readonly orderLoader: OrderDataloader,
   ) {}
 
+
+  @Auth({
+    permissions: [
+      {
+        action: DefaultPermissionActionsEnum.READ,
+        target: OrderItem.permissionsTarget,
+      },
+    ],
+  })
+  @Mutation(() => [OrderItem])
   async vendorOrders(
     @CurrentUser() user: User,
     @Args('pagination') pagination: PaginatorInput,

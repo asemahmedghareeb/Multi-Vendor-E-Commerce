@@ -39,7 +39,7 @@ export class OrdersResolver {
     permissions: [
       {
         action: DefaultPermissionActionsEnum.READ,
-        target: Payment.permissionsTarget,
+        target: Order.permissionsTarget,
       },
     ],
   })
@@ -49,7 +49,7 @@ export class OrdersResolver {
   ) {
     return this.ordersService.findAllOrders(pagination);
   }
-
+  
   @Auth()
   @Mutation(() => Order)
   @Transactional()
@@ -59,7 +59,7 @@ export class OrdersResolver {
   ) {
     return this.ordersService.createOrder(user, input);
   }
-
+  
   @Auth()
   @Query(() => OrdersPaginated)
   async myOrders(
@@ -68,11 +68,18 @@ export class OrdersResolver {
   ) {
     return this.ordersService.getMyOrders(user.id, pagination);
   }
-
-  @Auth()
+  
+  @Auth({
+    permissions: [
+      {
+        action: DefaultPermissionActionsEnum.READ,
+        target: Order.permissionsTarget,
+      },
+    ],
+  })
   @Query(() => Order, { name: 'order' })
   async getOrder(@Args('id') id: string, @CurrentUser() user: User) {
-    return this.ordersService.getOrder(id, user.id);
+    return this.ordersService.getOrder(id, user);
   }
 
   @ResolveField(() => [OrderItem])

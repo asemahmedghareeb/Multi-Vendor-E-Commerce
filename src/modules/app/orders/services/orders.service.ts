@@ -10,7 +10,6 @@ import { User } from '../../auth-base/user/entities/user.entity';
 import { Cart } from '../../cart/entities/cart.entity';
 import { AppHttpException } from 'src/common/exceptions/app-http.exception';
 import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
-import { FindOptionsRelations } from 'typeorm';
 import { CreateOrderInput } from '../dto/inputs/create-order.input';
 import { OrderStatus } from '../enum/order-status.enum';
 import { OrderTracking } from '../entities/order-tracking.entity';
@@ -18,6 +17,7 @@ import { PaymentService } from 'src/modules/core/payment/services/payment.servic
 import { PaymentGatewaysEnum } from 'src/modules/core/payment/enums/payment-gateways.enum';
 import { AppConfig } from 'src/config/app.config';
 import { CurrenciesEnum } from 'src/common/enums/currency.enum';
+import { UserRoleEnum } from 'src/common/enums/user-role.enum';
 @Injectable()
 export class OrdersService {
   constructor(
@@ -47,7 +47,6 @@ export class OrdersService {
       { createdAt: 'DESC' },
       page,
       limit,
-      ['payment'] as FindOptionsRelations<Order>,
     );
   }
 
@@ -152,12 +151,12 @@ export class OrdersService {
     );
   }
 
-  async getOrder(orderId: string, userId: string): Promise<Order> {
+  async getOrder(orderId: string, user: User): Promise<Order> {
     const order = await this.orderRepo.findOneOrFail({
       where: { id: orderId },
     });
 
-    if (order.userId !== userId) {
+    if (order.userId !== user.id && user.role !== UserRoleEnum.ADMIN) {
       throw new AppHttpException(ErrorCodeEnum.FORBIDDEN);
     }
 
