@@ -2,7 +2,7 @@ import { registerEnumType } from '@nestjs/graphql';
 
 export enum AdminGroupScopeEnum {
   GLOBAL = 'GLOBAL',
-  PRODUCT = 'PRODUCT',
+  PRODUCTS_AND_ORDERS = 'PRODUCTS_AND_ORDERS',
   //   TODO add needed scopes
 }
 

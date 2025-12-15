@@ -4,11 +4,9 @@ import {
   Column,
   OneToOne,
   JoinColumn,
-  RelationId,
   OneToMany,
 } from 'typeorm';
 import { ObjectType, Field, Float, Int } from '@nestjs/graphql';
-
 import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
 import { User } from '../../auth-base/user/entities/user.entity';
 import { Product } from '../../product/entities/product.entity';
@@ -16,7 +14,6 @@ import { OrderItem } from '../../orders/entities/order-item.entity';
 import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
 import { VendorPermissionActionsEnum } from '../enums/vendor-permission.enum';
 import { VendorStatus } from '../enums/vendor-status.enum';
-
 
 
 @ObjectType()

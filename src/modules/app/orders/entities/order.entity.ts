@@ -1,12 +1,11 @@
 import { ObjectType, Field, Float } from '@nestjs/graphql';
 import { Entity, Column, ManyToOne, OneToMany, JoinColumn, OneToOne } from 'typeorm';
 import { OrderItem } from './order-item.entity';
-
 import { OrderStatus } from '../enum/order-status.enum';
 import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
 import { User } from '../../auth-base/user/entities/user.entity';
-
 import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
+import { Payment } from 'src/modules/core/payment/entities/payment.entity';
 
 
 @ObjectType()
@@ -16,10 +15,10 @@ export class Order extends AppBaseEntity {
 
   @Field(() => User)
   @ManyToOne(() => User, { onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column({ name: 'user_id', nullable: true })
+  @Column()
   userId: string;
 
   @Field(() => Float)
@@ -32,7 +31,6 @@ export class Order extends AppBaseEntity {
   }) 
   totalAmount: number; 
 
-
   @Field(() => String)
   @Column({ type: 'jsonb' }) 
   shippingAddress: any; 
@@ -41,14 +39,11 @@ export class Order extends AppBaseEntity {
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })
   status: OrderStatus;
 
-
-  
   @Field(() => [OrderItem])
   @OneToMany(() => OrderItem, (item) => item.order, { cascade: true })
   items: OrderItem[];
 
-
-//   @Field(() => Payment, { nullable: true })
-//   @OneToOne(() => Payment, (payment) => payment.order)
-//   payment: Payment;
+  @Field(() => Payment, { nullable: true })
+  @OneToOne(() => Payment, (payment) => payment.order)
+  payment: Payment;
 }

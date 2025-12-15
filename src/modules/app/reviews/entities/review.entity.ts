@@ -30,7 +30,7 @@ export class Review extends AppBaseEntity {
 
   @Field(() => User)
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'userId' })
   user: User;
 
   @RelationId((review: Review) => review.user)
@@ -38,18 +38,17 @@ export class Review extends AppBaseEntity {
 
   @Field(() => Vendor)
   @ManyToOne(() => Vendor, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'vendor_id' })
+  @JoinColumn({ name: 'vendorId' })
   vendor: Vendor;
 
-
-  @RelationId((review: Review) => review.vendor)
+  @Column()
   vendorId: string;
 
   @Field(() => Order)
   @ManyToOne(() => Order, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'order_id' })
+  @JoinColumn({ name: 'orderId' })
   order: Order;
 
-  @RelationId((review: Review) => review.order)
+  @Column()
   orderId: string;
 }

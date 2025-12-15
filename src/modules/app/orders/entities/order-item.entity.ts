@@ -4,7 +4,6 @@ import {
   Field,
   Int,
   Float,
-  registerEnumType,
 } from '@nestjs/graphql';
 import {
   Entity,
@@ -12,11 +11,8 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
-  RelationId,
 } from 'typeorm';
-
 import { Order } from './order.entity';
-
 import { OrderTracking } from './order-tracking.entity';
 import { OrderStatus } from '../enum/order-status.enum';
 import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
@@ -48,26 +44,26 @@ export class OrderItem extends AppBaseEntity {
 
   @Field(() => Order)
   @ManyToOne(() => Order, (order) => order.items, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'order_id' })
+  @JoinColumn({ name: 'orderId' })
   order: Order;
 
-  @RelationId((item: OrderItem) => item.order)
+  @Column()
   orderId: string;
 
   @Field(() => Product)
   @ManyToOne(() => Product, { nullable: true })
-  @JoinColumn({ name: 'product_id' })
+  @JoinColumn({ name: 'productId' })
   product: Product;
 
-  @RelationId((item: OrderItem) => item.product)
+  @Column()
   productId: string;
 
   @Field(() => Vendor)
   @ManyToOne(() => Vendor)
-  @JoinColumn({ name: 'vendor_id' })
+  @JoinColumn({ name: 'vendorId' })
   vendor: Vendor;
 
-  @RelationId((item: OrderItem) => item.vendor)
+  @Column()
   vendorId: string;
 
   @Field(() => Int)

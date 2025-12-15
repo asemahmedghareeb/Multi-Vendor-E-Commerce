@@ -1,11 +1,13 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { Entity, Column, ManyToOne, JoinColumn, RelationId } from 'typeorm'; // <--- Import RelationId
+import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm'; 
 import { OrderItem } from './order-item.entity';
 import { OrderStatus } from '../enum/order-status.enum';
 import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
+import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
 
 @ObjectType()
 @Entity('order_tracking')
+@GeneratePermissions()
 export class OrderTracking extends AppBaseEntity {
   @Field(() => OrderStatus)
   @Column({
@@ -22,9 +24,9 @@ export class OrderTracking extends AppBaseEntity {
   @ManyToOne(() => OrderItem, (item) => item.trackingHistory, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'order_item_id' })
+  @JoinColumn({ name: 'orderItemId' })
   orderItem: OrderItem;
 
-  @RelationId((tracking: OrderTracking) => tracking.orderItem)
+  @Column()
   orderItemId: string;
 }

@@ -22,6 +22,6 @@ import { NotificationPusherModule } from 'src/modules/core/notification-pusher/n
     NotificationService,
     NotificationResolver,
   ],
-  exports: [],
+  exports: [NotificationService],
 })
 export class NotificationModule {}

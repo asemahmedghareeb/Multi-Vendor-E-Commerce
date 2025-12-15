@@ -11,7 +11,7 @@ export class CreateAdminGroupInput {
   description: string;
 
   @Field(() => AdminGroupScopeEnum)
-  scope: AdminGroupScopeEnum;
+  scope: AdminGroupScopeEnum; 
 
   @Field(() => [String])
   @ArrayNotEmpty()

@@ -1,51 +1,41 @@
-// import { ObjectType, Field, Float, registerEnumType } from '@nestjs/graphql';
-// import { Entity, Column, ManyToOne, JoinColumn, RelationId } from 'typeorm';
+import { ObjectType, Field, Float } from '@nestjs/graphql';
+import { Entity, Column, ManyToOne, JoinColumn, RelationId } from 'typeorm';
+import { Order } from '../../orders/entities/order.entity';
+import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
+import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
+import { Wallet } from './wallet.entity';
+import { TransactionType } from '../enums/transactions.enum';
 
-// import { Wallet } from './wallet.entity';
-// import { Order } from '../../orders/entities/order.entity';
-// import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
-// import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
+@ObjectType()
+@Entity('wallet_transactions')
+@GeneratePermissions()
+export class WalletTransaction extends AppBaseEntity {
+  @Field(() => Float)
+  @Column({
+    type: 'bigint',
+    transformer: { to: (v) => v, from: (v) => parseInt(v, 10) },
+  })
+  amount: number;
 
-// export enum TransactionType {
-//   DEPOSIT = 'DEPOSIT',
-//   SALE = 'SALE',
-//   COMMISSION = 'COMMISSION',
-//   PAYOUT = 'PAYOUT',
-//   REFUND = 'REFUND',
-// }
+  @Field(() => TransactionType)
+  @Column({ type: 'enum', enum: TransactionType })
+  type: TransactionType;
 
-// registerEnumType(TransactionType, { name: 'TransactionType' });
+  @Field()
+  @Column()
+  description: string;
 
-// @ObjectType()
-// @Entity('wallet_transactions')
-// @GeneratePermissions()
-// export class WalletTransaction extends AppBaseEntity {
-//   @Field(() => Float)
-//   @Column({
-//     type: 'bigint',
-//     transformer: { to: (v) => v, from: (v) => parseInt(v, 10) },
-//   })
-//   amount: number;
+  @ManyToOne(() => Wallet, (wallet) => wallet.transactions)
+  @JoinColumn({ name: 'walletId' })
+  wallet: Wallet;
 
-//   @Field(() => TransactionType)
-//   @Column({ type: 'enum', enum: TransactionType })
-//   type: TransactionType;
+  @RelationId((tx: WalletTransaction) => tx.wallet)
+  walletId: string;
 
-//   @Field()
-//   @Column()
-//   description: string;
+  @ManyToOne(() => Order, { nullable: true })
+  @JoinColumn({ name: 'orderId' })
+  order: Order;
 
-//   @ManyToOne(() => Wallet, (wallet) => wallet.transactions)
-//   @JoinColumn({ name: 'wallet_id' })
-//   wallet: Wallet;
-
-//   @RelationId((tx: WalletTransaction) => tx.wallet)
-//   walletId: string;
-
-//   @ManyToOne(() => Order, { nullable: true })
-//   @JoinColumn({ name: 'order_id' })
-//   order: Order;
-
-//   @RelationId((tx: WalletTransaction) => tx.order)
-//   orderId: string;
-// }
+  @RelationId((tx: WalletTransaction) => tx.order)
+  orderId: string;
+}

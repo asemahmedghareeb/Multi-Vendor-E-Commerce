@@ -21,7 +21,6 @@ import { CategoryLoader } from '../dataloaders/category.dataloader';
 export class ProductsResolver {
   constructor(
     private readonly productService: ProductService,
-    // private readonly guardHelperService: GuardHelperService,
     private readonly vendorDataLoader: VendorDataloader,
     private readonly categoryLoader: CategoryLoader,
   ) {}
@@ -48,19 +47,17 @@ export class ProductsResolver {
   async userFeed(
     @CurrentUser() user: User,
     @Args('pagination', { nullable: true })
-    pagination?: PaginatorInput,
+    pagination: PaginatorInput,
   ) {
-    const input = pagination || { page: 1, limit: 10 };
-    return this.productService.getUserFeed(user, input);
+    return this.productService.getUserFeed(user, pagination);
   }
 
   @Auth()
   @Query(() => ProductPaginated)
   async products(
-    @Args('filter', { nullable: true }) filter?: GetProductsFilterInput,
+    @Args('filter', { nullable: true }) filter: GetProductsFilterInput,
   ) {
-    const input = filter || { page: 1, limit: 10 };
-    return this.productService.findAll(input);
+    return this.productService.findAll(filter);
   }
 
   @Auth()

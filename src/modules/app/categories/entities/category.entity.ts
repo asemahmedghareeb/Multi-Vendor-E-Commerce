@@ -4,10 +4,8 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
-  RelationId
 } from 'typeorm';
-import { ObjectType, Field, Int, Parent } from '@nestjs/graphql';
-
+import { ObjectType, Field } from '@nestjs/graphql';
 import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
 import { Product } from '../../product/entities/product.entity';
 import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
@@ -27,7 +25,7 @@ export class Category extends AppBaseEntity {
   @JoinColumn({ name: 'parentId' })
   parent: Category;
 
-  @RelationId((category: Category) => category.parent)
+  @Column({ nullable: true })
   parentId: string;
 
   @Field(() => [Category], { nullable: true })

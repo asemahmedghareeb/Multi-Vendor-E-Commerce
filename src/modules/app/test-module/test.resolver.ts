@@ -145,20 +145,21 @@ export class TestResolver {
     return true;
   }
 
-  @Mutation(() => Payment)
-  @Auth()
-  async testPaymentIntent(
-    @Args() input: TestCreatePaymentIntent,
-    @CurrentUser() user: User,
-  ) {
-    return this.paymentService.createPaymentIntent(
-      PaymentGatewaysEnum.STRIPE,
-      input.amount,
-      AppConfig.appGeneralCurrency,
-      {},
-      user,
-    );
-  }
+  // @Mutation(() => Payment)
+  // @Auth()
+  // async testPaymentIntent(
+  //   @Args() input: TestCreatePaymentIntent,
+  //   @CurrentUser() user: User,
+  // ) {
+  //   return this.paymentService.createPaymentIntent(
+  //     PaymentGatewaysEnum.STRIPE,
+  //     input.amount,
+  //     AppConfig.appGeneralCurrency,
+  //     {},
+  //     user,
+
+  //   );
+  // }
 
   // @Mutation(() => Boolean)
   // async testRefund(@Args('paymentId') paymentId: string) {

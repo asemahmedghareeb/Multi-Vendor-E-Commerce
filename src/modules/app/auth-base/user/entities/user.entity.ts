@@ -19,7 +19,7 @@ import { AppJwtToken } from 'src/common/types/app-jwt-token.type';
 import { AdminGroup } from '../../admin-group/entities/admin-group.entity';
 import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
 import { Vendor } from 'src/modules/app/vendors/entities/vendor.entity';
-
+import { Wallet } from 'src/modules/app/wallet/entities/wallet.entity';
 
 @Entity()
 @ObjectType()
@@ -129,5 +129,17 @@ export class User extends AppBaseEntity {
   adminGroup: AdminGroup;
 
   @OneToOne(() => Vendor, (vendor) => vendor.user)
+  @JoinColumn({ name: 'vendorId' })
   vendorProfile: Vendor;
+
+  @Column({ nullable: true })
+  vendorId: string;
+
+  @OneToOne(() => Wallet, (Wallet) => Wallet.user)
+  @JoinColumn({ name: 'walletId' })
+  wallet: Wallet;
+
+  @Column({ nullable: true })
+  walletId: string;
+
 }

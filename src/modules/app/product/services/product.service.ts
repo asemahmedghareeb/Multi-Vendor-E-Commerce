@@ -3,6 +3,7 @@ import {
   Between,
   FindOptionsWhere,
   ILike,
+  In,
   LessThanOrEqual,
   MoreThanOrEqual,
 } from 'typeorm';
@@ -29,6 +30,8 @@ export class ProductService {
     private readonly vendorRepo: AppRepository<Vendor>,
     @InjectAppRepository(Category)
     private readonly categoryRepo: AppRepository<Category>,
+    @InjectAppRepository(Follow)
+    private readonly followRepo: AppRepository<Follow>,
   ) {}
 
   async create(userId: string, input: CreateProductInput): Promise<Product> {
@@ -70,86 +73,74 @@ export class ProductService {
   }
 
   async getUserFeed(user: User, pagination: PaginatorInput) {
-    const userId = user.id;
-    const page = pagination?.page || 1;
-    const limit = pagination?.limit || 10;
-    const skip = (page - 1) * limit;
+    const page = pagination.page || 1;
+    const limit = pagination.limit;
 
-    const qb = this.productRepo.createQueryBuilder('product');
+    const follows = await this.followRepo.find({
+      where: { followerId: user.id },
+      select: ['vendorId'],
+    });
 
-    qb.innerJoin(Follow, 'follow', 'follow.vendor.id = product.vendor.id');
+    const followedVendorIds = follows.map((f) => f.vendorId);
 
-    qb.where('follow.follower_id = :userId', { userId });
+    if (followedVendorIds.length === 0) {
+      return {
+        items: [],
+        pageInfo: {
+          limit,
+          page,
+          hasPrevious: page > 1,
+          hasNext: false,
+          totalCount: 0,
+        },
+      };
+    }
 
-    // qb.leftJoinAndSelect('product.vendor', 'vendor');
-
-    qb.orderBy('product.createdAt', 'DESC');
-    qb.skip(skip).take(limit);
-
-    const [items, totalItems] = await qb.getManyAndCount();
-
-    return {
-      items,
-      totalItems,
-      totalPages: Math.ceil(totalItems / limit),
-    };
+    return this.productRepo.findPaginated(
+      { vendorId: In(followedVendorIds) },
+      { createdAt: 'DESC' },
+      page,
+      limit,
+    );
   }
 
   async findAll(input: GetProductsFilterInput) {
     let { page, limit, search, vendorName, categoryName, minPrice, maxPrice } =
       input;
+    const where: FindOptionsWhere<Product> = {};
 
-    page = page || 1;
-    limit = limit || 10;
-    const skip = (page - 1) * limit;
-
-    const baseWhere: FindOptionsWhere<Product> = {};
-
-    if (minPrice !== undefined) {
-      baseWhere.price = MoreThanOrEqual(minPrice * 100);
-    }
-
-    if (maxPrice !== undefined && minPrice !== undefined) {
-      baseWhere.price = baseWhere.price
-        ? Between(minPrice * 100, maxPrice * 100)
-        : LessThanOrEqual(maxPrice * 100);
+    if (minPrice !== undefined && maxPrice !== undefined) {
+      where.price = Between(minPrice * 100, maxPrice * 100);
+    } else if (minPrice !== undefined) {
+      where.price = MoreThanOrEqual(minPrice * 100);
+    } else if (maxPrice !== undefined) {
+      where.price = LessThanOrEqual(maxPrice * 100);
     }
 
     if (vendorName) {
-      baseWhere.vendor = {
-        businessName: ILike(`%${vendorName}%`),
-      };
+      where.vendor = { businessName: ILike(`%${vendorName}%`) };
     }
 
     if (categoryName) {
-      baseWhere.category = {
-        name: ILike(`%${categoryName}%`),
-      };
+      where.category = { name: ILike(`%${categoryName}%`) };
     }
 
-    let finalWhere: FindOptionsWhere<Product> | FindOptionsWhere<Product>[];
+    let finalWhere: FindOptionsWhere<Product> | FindOptionsWhere<Product>[] =
+      where;
 
     if (search) {
       finalWhere = [
-        { ...baseWhere, name: ILike(`%${search}%`) },
-        { ...baseWhere, description: ILike(`%${search}%`) },
+        { ...where, name: ILike(`%${search}%`) },
+        { ...where, description: ILike(`%${search}%`) },
       ];
-    } else {
-      finalWhere = baseWhere;
     }
 
-    const [items, totalItems] = await this.productRepo.findAndCount({
-      where: finalWhere,
-      skip,
-      take: limit,
-      order: { createdAt: 'DESC' },
-    });
-
-    return {
-      items,
-      totalItems,
-      totalPages: Math.ceil(totalItems / limit),
-    };
+    return await this.productRepo.findPaginated(
+      finalWhere,
+      { createdAt: 'DESC' },
+      page,
+      limit,
+    );
   }
 
   async findOne(id: string): Promise<Product | null> {
@@ -166,9 +157,12 @@ export class ProductService {
   async update(userId: string, input: UpdateProductInput): Promise<Product> {
     const product = await this.productRepo.findOneOrFail({
       where: { id: input.id },
+      relations: {
+        vendor: true,
+      },
     });
     await this.checkOwnership(product, userId);
-    
+
     if (input.categoryId) {
       const category = await this.categoryRepo.findOne({
         where: { id: input.categoryId },
@@ -191,7 +185,12 @@ export class ProductService {
   }
 
   async remove(userId: string, id: string): Promise<boolean> {
-    const product = await this.productRepo.findOneOrFail({ where: { id } });
+    const product = await this.productRepo.findOneOrFail({
+      where: { id },
+      relations: {
+        vendor: true,
+      },
+    });
     await this.checkOwnership(product, userId);
 
     await this.productRepo.remove(product);
@@ -208,40 +207,26 @@ export class ProductService {
   }
 
   async findAllByVendor(vendorId: string, pagination: PaginatorInput) {
-    const page = pagination?.page || 1;
-    const limit = pagination?.limit || 10;
-    const skip = (page - 1) * limit;
+    const page = pagination.page;
+    const limit = pagination.limit;
 
-    const [items, totalItems] = await this.productRepo.findAndCount({
-      where: { vendor: { id: vendorId } },
-      skip,
-      take: limit,
-      order: { createdAt: 'DESC' },
-    });
-
-    return {
-      items,
-      totalItems,
-      totalPages: Math.ceil(totalItems / limit),
-    };
+    return await this.productRepo.findPaginated(
+      { vendor: { id: vendorId } },
+      { createdAt: 'DESC' },
+      page,
+      limit,
+    );
   }
 
   async findAllByCategory(categoryId: string, pagination: PaginatorInput) {
-    const page = pagination?.page || 1;
-    const limit = pagination?.limit || 10;
-    const skip = (page - 1) * limit;
+    const page = pagination.page;
+    const limit = pagination.limit;
 
-    const [items, totalItems] = await this.productRepo.findAndCount({
-      where: { category: { id: categoryId } },
-      skip,
-      take: limit,
-      order: { createdAt: 'DESC' },
-    });
-
-    return {
-      items,
-      totalItems,
-      totalPages: Math.ceil(totalItems / limit),
-    };
+    return await this.productRepo.findPaginated(
+      { category: { id: categoryId } },
+      { createdAt: 'DESC' },
+      page,
+      limit,
+    );
   }
 }

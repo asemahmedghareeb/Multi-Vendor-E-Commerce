@@ -17,6 +17,6 @@ import { User } from '../user/entities/user.entity';
     SessionCron,
     UserDataloader,
   ],
-  exports: [SessionService],
+  exports: [SessionService, UserDataloader],
 })
 export class SessionModule {}

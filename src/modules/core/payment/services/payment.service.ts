@@ -11,12 +11,14 @@ import { User } from 'src/modules/app/auth-base/user/entities/user.entity';
 import { Request } from 'express';
 import { AppHttpException } from 'src/common/exceptions/app-http.exception';
 import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
+import { Order } from 'src/modules/app/orders/entities/order.entity';
 
 @Injectable()
 export class PaymentService {
   constructor(
     @InjectAppRepository(Payment)
     private readonly paymentRepository: AppRepository<Payment>,
+    @InjectAppRepository(Order)
     private readonly moduleRef: ModuleRef,
   ) {}
 
@@ -26,6 +28,8 @@ export class PaymentService {
     currency: CurrenciesEnum,
     metadata: any,
     user: User,
+    // orderId?: string,
+    order: Order
   ) {
     const paymentStrategyClass = paymentStrategies[paymentGateway];
     const paymentStrategy =
@@ -39,6 +43,8 @@ export class PaymentService {
 
     paymentIntent.clientSecret;
 
+ 
+
     const payment = await this.paymentRepository.createOne({
       paymentGateway,
       externalId: paymentIntent.id,
@@ -46,6 +52,8 @@ export class PaymentService {
       currency,
       metadata,
       user,
+      order
+      // ...(orderId && { orderId }),
     });
 
     payment.clientSecret = paymentIntent.clientSecret;

@@ -7,14 +7,16 @@ import { Category } from '../categories/entities/category.entity';
 import { AppDatabaseModule } from 'src/modules/core/app-database/app-database.module';
 import { VendorDataloader } from './dataloaders/vendor.dataloader';
 import { CategoryLoader } from './dataloaders/category.dataloader';
+import { Follow } from '../follow/entities/follow.entity';
 
 @Module({
-  imports: [AppDatabaseModule.forFeature([Product, Vendor, Category])],
+  imports: [AppDatabaseModule.forFeature([Product, Vendor, Category, Follow])],
   providers: [
     ProductsResolver,
     ProductService,
     VendorDataloader,
     CategoryLoader,
   ],
+  exports: [VendorDataloader],
 })
 export class ProductModule {}

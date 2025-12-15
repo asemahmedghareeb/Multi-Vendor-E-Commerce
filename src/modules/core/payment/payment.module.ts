@@ -5,9 +5,10 @@ import { PaymentController } from './controllers/payment.controller';
 import { ConfigService } from '@nestjs/config';
 import { AppDatabaseModule } from '../app-database/app-database.module';
 import { Payment } from './entities/payment.entity';
+import { Order } from 'src/modules/app/orders/entities/order.entity';
 
 @Module({
-  imports: [AppDatabaseModule.forFeature([Payment])],
+  imports: [AppDatabaseModule.forFeature([Payment, Order])],
   providers: [
     PaymentService,
     StripeStrategy,

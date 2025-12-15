@@ -1,9 +1,17 @@
 import { User } from 'src/modules/app/auth-base/user/entities/user.entity';
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+} from 'typeorm';
 import { PaymentStatusEnum } from '../enums/payment-status.enum';
 import { AppBaseEntity } from '../../app-database/entities/app-base.entity';
 import { PaymentGatewaysEnum } from '../enums/payment-gateways.enum';
 import { Field, ObjectType } from '@nestjs/graphql';
+import { Order } from 'src/modules/app/orders/entities/order.entity';
 
 @Entity()
 @ObjectType()
@@ -49,4 +57,11 @@ export class Payment extends AppBaseEntity {
   @ManyToOne(() => User)
   @JoinColumn({ name: 'userId' })
   user: User;
+
+  @OneToOne(() => Order, (order) => order.payment)
+  @JoinColumn({ name: 'orderId' })
+  order: Order;
+
+  @Column({ nullable: true })
+  orderId?: string;
 }

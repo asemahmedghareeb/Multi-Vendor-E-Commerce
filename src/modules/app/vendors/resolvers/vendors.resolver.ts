@@ -8,30 +8,29 @@ import {
 } from '@nestjs/graphql';
 import { VendorService } from '../services/vendors.service';
 import { Vendor } from '../entities/vendor.entity';
-// import { UserLoader } from 'src/dataLoaders/user.loader';
-// import { ReviewsLoader } from 'src/dataLoaders/reviews.loader';
-// import { ProductLoader } from 'src/dataLoaders/products.loader';
 import { VendorPermissionActionsEnum } from '../enums/vendor-permission.enum';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { User } from '../../auth-base/user/entities/user.entity';
-// import { OrderItem } from '../orders/entities/order-item.entity';
 import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
 import { PaginatedVendors } from '../dtos/responses/paginatedVendors';
 import { VendorStatus } from '../enums/vendor-status.enum';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { RequestVendorInput } from '../dtos/inputs/request-vendor.input';
 import { Transactional } from 'typeorm-transactional';
-import { Review } from '../../reviews/entities/review.entity';
+import { UserDataloader } from '../../auth-base/session/dataloaders/user.dataloader';
+import { PaginatedVendorProducts } from '../dtos/responses/paginated-vendor-products.type';
+import { VendorProductsInput } from '../dtos/inputs/vendor-products.input';
+import { PaginatedVendorOrders } from '../dtos/responses/paginated-vendor-orders.type';
+import { VendorOrdersInput } from '../dtos/inputs/vendor-orders.input';
+import { PaginatedVendorReviews } from '../dtos/responses/paginated-vendor-reviews.type';
+import { VendorReviewsInput } from '../dtos/inputs/vendor-reviews.input';
 
 @Resolver(() => Vendor)
-export class UsersResolver {
+export class VendorsResolver {
   constructor(
     private readonly vendorService: VendorService,
-    // private readonly userLoader: UserLoader,
-    // private readonly reviewsLoader: ReviewsLoader,
-    // private readonly productLoader: ProductLoader,
-    // private readonly orderItemsLoader: OrderItemsLoader,
+    private readonly userDataloader: UserDataloader,
   ) {}
 
   @Auth()
@@ -42,7 +41,7 @@ export class UsersResolver {
   ) {
     return this.vendorService.findAll(pagination || { page: 1, limit: 10 });
   }
-  
+
   @Auth({
     roles: [UserRoleEnum.ADMIN],
     permissions: [
@@ -83,22 +82,35 @@ export class UsersResolver {
     return this.vendorService.requestVendorStatus(user.id, input);
   }
 
-  // @ResolveField(() => User)
-  // async user(@Parent() vendor: Vendor) {
-  //   if (vendor.user) return vendor.user;
-  //   return this.userLoader.batchUsers.load(vendor.userId);
-  // }
+  @Auth()
+  @Query(() => PaginatedVendorProducts)
+  async vendorProducts(
+    @Args('vendorId', { type: () => String }) vendorId: string,
+    @Args('pagination') pagination: VendorProductsInput,
+  ) {
+    return this.vendorService.vendorProducts(vendorId, pagination);
+  }
 
-  // @ResolveField(() => [Review])
-  // async reviews(@Parent() vendor: Vendor) {
-  //   if (vendor.reviews) return vendor.reviews;
-  //   return this.reviewsLoader.load.load(vendor.id);
-  // }
+  @Auth({ roles: [UserRoleEnum.ADMIN] })
+  @Query(() => PaginatedVendorOrders)
+  async vendorOrders(
+    @Args('vendorId', { type: () => String }) vendorId: string,
+    @Args('pagination') pagination: VendorOrdersInput,
+  ) {
+    return this.vendorService.vendorOrders(vendorId, pagination);
+  }
 
-  // @ResolveField(() => [OrderItem])
-  // async orders(@Parent() vendor: Vendor) {
-  //   if (vendor.orders) return vendor.orders;
-
-  //   return this.orderItemsLoader.byVendorId.load(vendor.id);
-  // }
+  @Auth()
+  @Query(() => PaginatedVendorReviews)
+  async vendorReviews(
+    @Args('vendorId', { type: () => String }) vendorId: string,
+    @Args('pagination') pagination: VendorReviewsInput,
+  ) {
+    return this.vendorService.vendorReviews(vendorId, pagination);
+  }
+  @ResolveField(() => User)
+  async user(@Parent() vendor: Vendor) {
+    if (vendor.user) return vendor.user;
+    return this.userDataloader.getDataloader().load(vendor.userId);
+  }
 }

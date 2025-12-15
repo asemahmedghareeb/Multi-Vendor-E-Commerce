@@ -1,7 +1,4 @@
 import { Module } from '@nestjs/common';
-
-import { FollowsService } from './follow.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { Follow } from './entities/follow.entity';
 import { User } from '../auth-base/user/entities/user.entity';
 import { Vendor } from '../vendors/entities/vendor.entity';

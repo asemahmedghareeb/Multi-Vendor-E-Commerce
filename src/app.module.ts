@@ -48,7 +48,6 @@ import { ReviewsModule } from './modules/app/reviews/reviews.module';
 import { FollowModule } from './modules/app/follow/follow.module';
 import { CategoriesModule } from './modules/app/categories/categories.module';
 import { WishlistModule } from './modules/app/wishlist/wishlist.module';
-import { AgoraModule } from './modules/app/agora/agora.module';
 import { adminGroupModule } from './modules/app/auth-base/admin-group/admin-group.module';
 import { BlogModule } from './modules/app/blog/blog.module';
 import { ContentModule } from './modules/app/content/content.module';
@@ -108,7 +107,6 @@ import { VendorsModule } from './modules/app/vendors/vendors.module';
     FollowModule,
     CategoriesModule,
     WishlistModule,
-    AgoraModule,
     adminGroupModule,
     BlogModule,
     ContentModule,

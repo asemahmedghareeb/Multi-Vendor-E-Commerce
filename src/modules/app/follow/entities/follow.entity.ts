@@ -5,7 +5,7 @@ import {
   JoinColumn,
   Unique,
   Index,
-  RelationId,
+  Column,
 } from 'typeorm'; 
 
 import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
@@ -15,25 +15,22 @@ import { Vendor } from '../../vendors/entities/vendor.entity';
 @ObjectType()
 @Entity('follows')
 @Unique(['follower', 'vendor'])
-
 export class Follow extends AppBaseEntity {
   @Index()
   @Field(() => User)
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'follower_id' })
+  @JoinColumn({ name: 'followerId' })
   follower: User;
 
-  @Field()
-  @RelationId((follow: Follow) => follow.follower)
+  @Column()
   followerId: string;
 
   @Index()
   @Field(() => Vendor)
   @ManyToOne(() => Vendor, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'vendor_id' })
+  @JoinColumn({ name: 'vendorId' })
   vendor: Vendor;
 
-  @Field()
-  @RelationId((follow: Follow) => follow.vendor)
+  @Column()
   vendorId: string;
 }
