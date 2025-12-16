@@ -7,7 +7,6 @@ import {
   Parent,
 } from '@nestjs/graphql';
 import { Order } from '../entities/order.entity';
-
 import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
@@ -49,7 +48,7 @@ export class OrdersResolver {
   ) {
     return this.ordersService.findAllOrders(pagination);
   }
-  
+
   @Auth()
   @Mutation(() => Order)
   @Transactional()
@@ -59,7 +58,8 @@ export class OrdersResolver {
   ) {
     return this.ordersService.createOrder(user, input);
   }
-  
+
+  //for clients
   @Auth()
   @Query(() => OrdersPaginated)
   async myOrders(
@@ -68,8 +68,9 @@ export class OrdersResolver {
   ) {
     return this.ordersService.getMyOrders(user.id, pagination);
   }
-  
+
   @Auth({
+    roles: [UserRoleEnum.ADMIN, UserRoleEnum.VENDOR],
     permissions: [
       {
         action: DefaultPermissionActionsEnum.READ,

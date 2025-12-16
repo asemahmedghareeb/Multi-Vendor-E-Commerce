@@ -7,7 +7,6 @@ import { RequestVendorInput } from '../dtos/inputs/request-vendor.input';
 import { InjectAppRepository } from 'src/common/decorators/inject-app-repository.decorator';
 import { AppRepository } from 'src/modules/core/app-database/repositories/app.repository';
 import { AdminGroup } from '../../auth-base/admin-group/entities/admin-group.entity';
-import { AdminGroupScopeEnum } from 'src/common/enums/admin-group-scope.enum';
 import { MailService } from 'src/modules/core/mail/services/mail.service';
 import { MailSubjectEnum } from 'src/modules/core/mail/enums/mail-subject.enum';
 import { MailTemplateEnum } from 'src/modules/core/mail/enums/mail-template.enum';
@@ -23,6 +22,9 @@ import { VendorReviewsInput } from '../dtos/inputs/vendor-reviews.input';
 import { FindOptionsWhere, Like } from 'typeorm';
 import { OrderItem } from '../../orders/entities/order-item.entity';
 import { OrderStatus } from '../../orders/enum/order-status.enum';
+import { UserRoleEnum } from 'src/common/enums/user-role.enum';
+import { AppHttpException } from 'src/common/exceptions/app-http.exception';
+import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
 
 @Injectable()
 export class VendorService {
@@ -77,24 +79,26 @@ export class VendorService {
   async updateVendorStatus(
     userId: string,
     status: VendorStatus,
-  ): Promise<Vendor> {
+  ): Promise<Boolean> {
     const vendor = await this.vendorRepo.findOneOrFail({
       where: { user: { id: userId } },
       relations: { user: true },
     });
 
     if (vendor.status === status) {
-      return vendor;
+      throw new AppHttpException(ErrorCodeEnum.BAD_REQUEST_EXCEPTION);
     }
 
     vendor.status = status;
 
     const userEmail = vendor.user.email as string;
     if (status === VendorStatus.VERIFIED) {
-      const adminGroup = await this.adminGroupRepo.findOneByOrFail({
-        scope: AdminGroupScopeEnum.PRODUCTS_AND_ORDERS,
-      });
-      vendor.user.adminGroup = adminGroup;
+      // const adminGroup = await this.adminGroupRepo.findOneByOrFail({
+      //   scope: AdminGroupScopeEnum.PRODUCTS_AND_ORDERS,
+      // });
+      // vendor.user.adminGroup = adminGroup;
+      vendor.user.role = UserRoleEnum.VENDOR;
+      await this.userRepo.save(vendor.user);
 
       this.mailService.sendEmailWithATemplate(
         userEmail,
@@ -146,7 +150,7 @@ export class VendorService {
       await this.notificationService.SendNotification(notificationInput);
     }
 
-    return this.vendorRepo.save(vendor);
+    return true;
   }
 
   async findPendingVendors(): Promise<Vendor[]> {

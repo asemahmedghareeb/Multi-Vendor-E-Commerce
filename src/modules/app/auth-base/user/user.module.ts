@@ -14,10 +14,11 @@ import { UserResolver } from './resolvers/user.resolver';
 import { AdminGroup } from '../admin-group/entities/admin-group.entity';
 import { RequestVerificationService } from './services/request-verification-code.service';
 import { AdminGroupDataloader } from './dataloaders/admin-group.dataloader';
+import { Wallet } from '../../wallet/entities/wallet.entity';
 
 @Module({
   imports: [
-    AppDatabaseModule.forFeature([User, UserVerificationCode, AdminGroup]),
+    AppDatabaseModule.forFeature([User, UserVerificationCode, AdminGroup,Wallet]),
     MailModule,
     SmsModule,
     adminGroupModule,

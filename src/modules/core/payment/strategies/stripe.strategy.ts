@@ -96,9 +96,10 @@ export class StripeStrategy implements PaymentStrategy {
     };
   }
 
-  async refund(externalId: string): Promise<void> {
+  async refund(externalId: string, amount?: number): Promise<void> {
     await this.stripeClient.refunds.create({
       payment_intent: externalId,
     });
   }
+
 }

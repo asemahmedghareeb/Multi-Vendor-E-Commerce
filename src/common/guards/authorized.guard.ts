@@ -73,7 +73,12 @@ export class AuthorizedGuard implements CanActivate {
       throw new AppHttpException(ErrorCodeEnum.FORBIDDEN);
     }
 
-    if (requiredPermissions?.length) {
+    console.log(currentUser.role);
+
+    if (
+      requiredPermissions?.length &&
+      currentUser.role === UserRoleEnum.ADMIN
+    ) {
       await this.guardHelperService.validateUserHasPermission(
         currentUser,
         requiredPermissions,

@@ -16,6 +16,7 @@ import { DefaultPermissionActionsEnum } from 'src/common/enums/default-permissio
 import { Transactional } from 'typeorm-transactional';
 import { VendorDataloader } from '../dataloaders/vendor.dataloader';
 import { CategoryLoader } from '../dataloaders/category.dataloader';
+import { UserRoleEnum } from 'src/common/enums/user-role.enum';
 
 @Resolver(() => Product)
 export class ProductsResolver {
@@ -26,6 +27,7 @@ export class ProductsResolver {
   ) {}
 
   @Auth({
+    roles:[UserRoleEnum.ADMIN, UserRoleEnum.VENDOR],
     permissions: [
       {
         action: DefaultPermissionActionsEnum.CREATE,
@@ -66,7 +68,11 @@ export class ProductsResolver {
     return this.productService.findOne(id);
   }
 
+
+
+  
   @Auth({
+    roles:[UserRoleEnum.ADMIN, UserRoleEnum.VENDOR],
     permissions: [
       {
         action: DefaultPermissionActionsEnum.UPDATE,
@@ -75,16 +81,18 @@ export class ProductsResolver {
     ],
   })
   @Mutation(() => Product)
-  @Auth()
   @Transactional()
   async updateProduct(
     @Args('updateProductInput') updateProductInput: UpdateProductInput,
     @CurrentUser() user: User,
   ) {
-    return this.productService.update(user.id, updateProductInput);
+    return this.productService.update(user, updateProductInput);
   }
 
+
+
   @Auth({
+    roles:[UserRoleEnum.ADMIN, UserRoleEnum.VENDOR],
     permissions: [
       {
         action: DefaultPermissionActionsEnum.DELETE,
@@ -98,7 +106,7 @@ export class ProductsResolver {
     @Args('id', { type: () => String }) id: string,
     @CurrentUser() user: User,
   ) {
-    return this.productService.remove(user.id, id);
+    return this.productService.remove(user, id);
   }
 
   @ResolveField(() => Vendor)

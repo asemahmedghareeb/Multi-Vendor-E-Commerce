@@ -21,6 +21,7 @@ import { GetProductsFilterInput } from '../dto/inputs/product-filter.input';
 import { AppHttpException } from 'src/common/exceptions/app-http.exception';
 import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
 import { VendorStatus } from '../../vendors/enums/vendor-status.enum';
+import { UserRoleEnum } from 'src/common/enums/user-role.enum';
 @Injectable()
 export class ProductService {
   constructor(
@@ -154,14 +155,14 @@ export class ProductService {
     return product;
   }
 
-  async update(userId: string, input: UpdateProductInput): Promise<Product> {
+  async update(user: User, input: UpdateProductInput): Promise<Product> {
     const product = await this.productRepo.findOneOrFail({
       where: { id: input.id },
       relations: {
         vendor: true,
       },
     });
-    await this.checkOwnership(product, userId);
+    await this.checkOwnership(product, user);
 
     if (input.categoryId) {
       const category = await this.categoryRepo.findOne({
@@ -184,24 +185,29 @@ export class ProductService {
     return this.productRepo.save(product);
   }
 
-  async remove(userId: string, id: string): Promise<boolean> {
+  async remove(user: User, id: string): Promise<boolean> {
     const product = await this.productRepo.findOneOrFail({
       where: { id },
       relations: {
         vendor: true,
       },
     });
-    await this.checkOwnership(product, userId);
+    await this.checkOwnership(product,user );
 
     await this.productRepo.remove(product);
     return true;
   }
 
-  private async checkOwnership(product: Product, userId: string) {
+  private async checkOwnership(product: Product, user: User) {
     const vendorProfile = await this.vendorRepo.findOne({
-      where: { user: { id: userId } },
+      where: { user: { id: user.id } },
     });
-    if (!vendorProfile || product.vendor.id !== vendorProfile.id) {
+
+    if (
+      vendorProfile &&
+      product.vendor.id !== vendorProfile.id &&
+      user.role !== UserRoleEnum.ADMIN
+    ) {
       throw new AppHttpException(ErrorCodeEnum.FORBIDDEN);
     }
   }

@@ -29,7 +29,7 @@ export class PaymentService {
     metadata: any,
     user: User,
     // orderId?: string,
-    order: Order
+    order: Order,
   ) {
     const paymentStrategyClass = paymentStrategies[paymentGateway];
     const paymentStrategy =
@@ -43,8 +43,6 @@ export class PaymentService {
 
     paymentIntent.clientSecret;
 
- 
-
     const payment = await this.paymentRepository.createOne({
       paymentGateway,
       externalId: paymentIntent.id,
@@ -52,7 +50,7 @@ export class PaymentService {
       currency,
       metadata,
       user,
-      order
+      order,
       // ...(orderId && { orderId }),
     });
 
@@ -86,22 +84,38 @@ export class PaymentService {
       paymentStatus: paymentInfo.status,
     });
   }
-
+  //add the wallet logic here
   async refundPayment(paymentId: string) {
-    const payment = await this.paymentRepository.findOne({
-      where: {
-        id: paymentId,
+    const payment = await this.paymentRepository.findOneOrFail(
+      {
+        where: {
+          id: paymentId,
+        },
       },
-    });
-
-    if (!payment) {
-      throw new AppHttpException(ErrorCodeEnum.PAYMENT_DOES_NOT_EXIST);
-    }
+      ErrorCodeEnum.PAYMENT_DOES_NOT_EXIST,
+    );
 
     const paymentStrategyClass = paymentStrategies[payment.paymentGateway];
     const paymentStrategy =
       this.moduleRef.get<PaymentStrategy>(paymentStrategyClass);
 
     await paymentStrategy.refund(payment.externalId);
+  }
+
+  async RefundPaymentPartially(paymentId: string, amount: number) {
+    const payment = await this.paymentRepository.findOneOrFail(
+      {
+        where: {
+          id: paymentId,
+        },
+      },
+      ErrorCodeEnum.PAYMENT_DOES_NOT_EXIST,
+    );
+
+    const paymentStrategyClass = paymentStrategies[payment.paymentGateway];
+    const paymentStrategy =
+      this.moduleRef.get<PaymentStrategy>(paymentStrategyClass);
+
+    await paymentStrategy.refund(payment.externalId, amount);
   }
 }

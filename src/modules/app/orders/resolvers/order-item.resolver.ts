@@ -2,6 +2,7 @@ import {
   Args,
   Mutation,
   Parent,
+  Query,
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
@@ -20,6 +21,7 @@ import { Auth } from 'src/common/decorators/auth.decorator';
 import { DefaultPermissionActionsEnum } from 'src/common/enums/default-permissions.enum';
 import { Transactional } from 'typeorm-transactional';
 import { OrderStatus } from '../enum/order-status.enum';
+import { UserRoleEnum } from 'src/common/enums/user-role.enum';
 
 @Resolver(() => OrderItem)
 export class OrderItemResolver {
@@ -30,8 +32,9 @@ export class OrderItemResolver {
     private readonly orderLoader: OrderDataloader,
   ) {}
 
-
+  //for vendors and admins
   @Auth({
+    roles: [UserRoleEnum.ADMIN, UserRoleEnum.VENDOR],
     permissions: [
       {
         action: DefaultPermissionActionsEnum.READ,
@@ -39,7 +42,7 @@ export class OrderItemResolver {
       },
     ],
   })
-  @Mutation(() => [OrderItem])
+  @Query(() => [OrderItem])
   async vendorOrders(
     @CurrentUser() user: User,
     @Args('pagination') pagination: PaginatorInput,
@@ -48,6 +51,7 @@ export class OrderItemResolver {
   }
 
   @Auth({
+    roles: [UserRoleEnum.ADMIN, UserRoleEnum.VENDOR],
     permissions: [
       {
         action: DefaultPermissionActionsEnum.UPDATE,

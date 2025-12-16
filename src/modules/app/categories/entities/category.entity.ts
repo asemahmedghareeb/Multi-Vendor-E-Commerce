@@ -22,14 +22,14 @@ export class Category extends AppBaseEntity {
   @ManyToOne(() => Category, (category) => category.children, {
     nullable: true,
   })
-  @JoinColumn({ name: 'parentId' })
+  @JoinColumn({ name: 'parentId'})
   parent: Category;
 
   @Column({ nullable: true })
   parentId: string;
 
   @Field(() => [Category], { nullable: true })
-  @OneToMany(() => Category, (category) => category.parent)
+  @OneToMany(() => Category, (category) => category.parent, { nullable: true , cascade: true})
   children: Category[];
 
   @OneToMany(() => Product, (product) => product.category)

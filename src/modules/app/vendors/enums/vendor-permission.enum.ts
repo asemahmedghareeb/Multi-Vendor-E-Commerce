@@ -12,5 +12,3 @@ export const VendorPermissionActionsEnum = {
 
 export type VendorPermissionActionsEnum =
   (typeof VendorPermissionActionsEnum)[keyof typeof VendorPermissionActionsEnum];
-
-

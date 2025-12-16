@@ -9,15 +9,18 @@ import { plainToInstance } from 'class-transformer';
 import { SuperAdminCredentials } from '../types/super-admin-credentials.type';
 import { validateOrReject } from 'class-validator';
 import { UserService } from './user.service';
-import { AppConfig } from 'src/config/app.config';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
 import { ManualRegisterWithPasswordInput } from '../../auth/dtos/inputs/manual-register-user-with-password.input';
+import { Wallet } from 'src/modules/app/wallet/entities/wallet.entity';
 
 @Injectable()
 export class SeedSuperAdminService {
   constructor(
     @InjectAppRepository(User)
     private readonly userRepository: AppRepository<User>,
+    @InjectAppRepository(Wallet)
+    private readonly walletRepository: AppRepository<Wallet>,
+
     private readonly userService: UserService,
     private readonly adminGroupService: AdminGroupService,
     private readonly permissionService: PermissionService,
@@ -50,9 +53,9 @@ export class SeedSuperAdminService {
         adminGroupId: superAdminGroup.id,
       },
     });
-
+  
     if (!existedSuperAdmin) {
-      await this.userService.registerUser(
+      const user = await this.userService.registerUser(
         {
           firstName: 'Super',
           lastName: 'Admin',
@@ -65,6 +68,14 @@ export class SeedSuperAdminService {
         false,
         superAdminGroup.id,
       );
+
+      const wallet = await this.walletRepository.save(
+        this.walletRepository.create({
+          user,
+          balance: 0,
+        }),
+      );
+      await this.userRepository.update(user.id, { walletId: wallet.id });
     }
   }
 
