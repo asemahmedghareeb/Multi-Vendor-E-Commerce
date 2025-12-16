@@ -9,6 +9,8 @@ import { InjectAppRepository } from 'src/common/decorators/inject-app-repository
 import { AppRepository } from 'src/modules/core/app-database/repositories/app.repository';
 import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
 import { AppHttpException } from 'src/common/exceptions/app-http.exception';
+import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
+import { FindOptionsRelations } from 'typeorm';
 
 @Injectable()
 export class CartService {
@@ -19,30 +21,37 @@ export class CartService {
     @InjectAppRepository(Product) private productRepo: AppRepository<Product>,
     @InjectAppRepository(User) private userRepo: AppRepository<User>,
   ) {}
-  async getCart(userId: string): Promise<Cart> {
+
+
+  async getCart(user: User, pagination: PaginatorInput) {
+    const { page, limit } = pagination;
     let cart = await this.cartRepo.findOne({
-      where: { user: { id: userId } },
-      // relations: ['items', 'user', 'items.product', 'items.product.vendor'],
-      relations: ['items', 'user'],
+      where: { user: { id: user.id } },
+      relations: ['items', 'items.product', 'items.product.vendor'],
       order: { items: { createdAt: 'ASC' } },
     });
-    
-
     if (!cart) {
-      const user = await this.userRepo.findOne({ where: { id: userId } });
-
-      if (!user) {
-        throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
-      }
-
-      cart = this.cartRepo.create({ user: user, items: [] });
-      await this.cartRepo.save(cart);
+      cart = await this.createCart(user);
+      return cart;
     }
-
-    return cart;
+    return this.cartItemRepo.findPaginated(
+      { cart: { id: cart.id } },
+      { createdAt: 'DESC' },
+      page,
+      limit,
+      ['product', 'product.vendor'] as FindOptionsRelations<CartItem>,
+    );
   }
 
-  
+  async createCart(user: User): Promise<Cart> {
+    const cart = this.cartRepo.create({
+      user: user,
+      items: [],
+      totalAmount: 0,
+    });
+    return await this.cartRepo.save(cart);
+  }
+
   async addToCart(user: User, input: AddToCartInput): Promise<Cart> {
     const userId = user.id;
     let cart = await this.cartRepo.findOne({
@@ -55,12 +64,7 @@ export class CartService {
       if (!user) {
         throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
       }
-      cart = this.cartRepo.create({
-        user: user,
-        items: [],
-        totalAmount: 0,
-      });
-      await this.cartRepo.save(cart);
+      cart = await this.createCart(user);
     }
 
     const product = await this.productRepo.findOneOrFail({
@@ -109,37 +113,37 @@ export class CartService {
     return cart;
   }
 
-  async updateCartItem(user: User, input: UpdateCartItemInput): Promise<Cart> {
-    const userId = user.id;
-    const cart = await this.getCart(userId);
+  // async updateCartItem(user: User, input: UpdateCartItemInput): Promise<Cart> {
+  //   const userId = user.id;
+  //   const cart = await this.getCart(userId);
 
-    const cartItem = await this.cartItemRepo.findOneOrFail({
-      where: { id: input.cartItemId, cart: { id: cart.id } },
-      relations: ['product'],
-    });
+  //   const cartItem = await this.cartItemRepo.findOneOrFail({
+  //     where: { id: input.cartItemId, cart: { id: cart.id } },
+  //     relations: ['product'],
+  //   });
 
-    if (cartItem.product.inventoryCount < input.quantity) {
-      throw new AppHttpException(ErrorCodeEnum.INSUFFICIENT_INVENTORY, {
-        count: cartItem.product.inventoryCount,
-      });
-    }
-    cartItem.quantity = input.quantity;
-    await this.cartItemRepo.save(cartItem);
-    return this.getCart(userId);
-  }
+  //   if (cartItem.product.inventoryCount < input.quantity) {
+  //     throw new AppHttpException(ErrorCodeEnum.INSUFFICIENT_INVENTORY, {
+  //       count: cartItem.product.inventoryCount,
+  //     });
+  //   }
+  //   cartItem.quantity = input.quantity;
+  //   await this.cartItemRepo.save(cartItem);
+  //   // return this.getCart(userId);
+  // }
 
-  async removeFromCart(user: User, cartItemId: string): Promise<Cart> {
-    const userId = user.id;
-    const cart = await this.getCart(userId);
+  // async removeFromCart(user: User, cartItemId: string): Promise<Cart> {
+  //   const userId = user.id;
+  //   // const cart = await this.getCart(userId);
 
-    const result = await this.cartItemRepo.delete({
-      id: cartItemId,
-      cart: { id: cart.id },
-    });
+  //   const result = await this.cartItemRepo.delete({
+  //     id: cartItemId,
+  //     cart: { id: cart.id },
+  //   });
 
-    if (result.affected === 0)
-      throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
+  //   if (result.affected === 0)
+  //     throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
 
-    return this.getCart(userId);
-  }
+  //   return this.getCart(userId);
+  // }
 }

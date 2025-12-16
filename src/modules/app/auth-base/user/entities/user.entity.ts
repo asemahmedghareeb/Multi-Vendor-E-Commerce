@@ -95,6 +95,11 @@ export class User extends AppBaseEntity {
   @Field()
   role: UserRoleEnum;
 
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  followingCount: number;
+
   @Field(() => AppJwtToken, { nullable: true })
   jwtAutToken?: AppJwtToken;
 

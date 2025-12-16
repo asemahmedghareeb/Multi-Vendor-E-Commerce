@@ -14,6 +14,7 @@ import { OrderItem } from '../../orders/entities/order-item.entity';
 import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
 import { VendorPermissionActionsEnum } from '../enums/vendor-permission.enum';
 import { VendorStatus } from '../enums/vendor-status.enum';
+import { Follow } from '../../follow/entities/follow.entity';
 
 
 @ObjectType()
@@ -27,7 +28,6 @@ export class Vendor extends AppBaseEntity {
   @Field()
   @Column({ type: 'text' })
   bio: string;
-
 
   @Field()
   @Column({ type: 'enum', enum: VendorStatus, default: VendorStatus.PENDING })
@@ -44,6 +44,7 @@ export class Vendor extends AppBaseEntity {
   @Field(() => Int)
   @Column({ type: 'int', default: 0 })
   reviewsCount: number;
+
 
   @Field(() => Int)
   @Column({ type: 'int', default: 0 })
@@ -71,4 +72,8 @@ export class Vendor extends AppBaseEntity {
   @Field(() => [Review])
   @OneToMany(() => Review, (review) => review.vendor)
   reviews: Review[];
+
+  @Field(() => [Follow])
+  @OneToMany(() => Follow, (Follow) => Follow.vendor)
+  followers: Follow[];
 }

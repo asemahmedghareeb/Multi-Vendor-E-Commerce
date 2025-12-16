@@ -24,7 +24,6 @@ export class WishlistItem extends AppBaseEntity {
   @JoinColumn({ name: 'productId' })
   product: Product;
 
-  @Field(() => String)
   @Column()
   productId: string;
 }

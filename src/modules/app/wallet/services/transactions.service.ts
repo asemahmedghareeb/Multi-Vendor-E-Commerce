@@ -13,7 +13,7 @@ export class WalletTransactionService {
     private readonly walletRepository: AppRepository<Wallet>,
   ) {}
 
-  async walletTransactions(user: User, input: PaginatorInput) {
+  async walletTransactions(user: User, input: PaginatorInput){
     const { page, limit } = input;
     const wallet = await this.walletRepository.findOneOrFail({
       where: { user },

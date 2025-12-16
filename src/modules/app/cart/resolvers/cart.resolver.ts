@@ -4,29 +4,41 @@ import {
   Mutation,
   Args,
   ResolveField,
-  Parent,
+  Root,
 } from '@nestjs/graphql';
 
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { Cart } from '../entities/cart.entity';
-import { CartItem } from '../entities/cart-item.entity';
 import { AddToCartInput } from '../dto/inputs/add-to-cart.input';
 import { UpdateCartItemInput } from '../dto/inputs/update-cart-item-input';
 import { CartService } from '../services/cart.service';
 import { User } from '../../auth-base/user/entities/user.entity';
-import { Product } from '../../product/entities/product.entity';
 import { Transactional } from 'typeorm-transactional';
-import { ProductsDataloader } from '../dataloaders/product.dataloader';
+import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
+import { CartItemPaginated } from '../dto/responses/cart-item-paginated.response';
 @Resolver(() => Cart)
 export class CartResolver {
   constructor(private readonly cartService: CartService) {}
 
   @Auth()
-  @Query(() => Cart, { name: 'myCart' })
-  async myCart(@CurrentUser() user: { userId: string }) {
-    return this.cartService.getCart(user.userId);
+  @Query(() => CartItemPaginated)
+  async myCart(@CurrentUser() user: User, pagination: PaginatorInput) {
+    return this.cartService.getCart(user, pagination);
   }
+
+  // @ResolveField(() => CartItemPaginated)
+  // async items(
+  //   @Root() cart: Cart,
+  //   @Args('paginate', {
+  //     type: () => PaginatorInput,
+  //     nullable: true,
+  //     defaultValue: { page: 1, limit: 15 },
+  //   })
+  //   paginatorInput: PaginatorInput,
+  // ): Promise<CartItemPaginated> {
+  //   return this.cartService.getCartItems(cart.id, paginatorInput);
+  // }
 
   @Auth()
   @Mutation(() => Cart)
@@ -37,7 +49,7 @@ export class CartResolver {
   ) {
     return this.cartService.addToCart(user, input);
   }
- 
+
   @Auth()
   @Mutation(() => Cart)
   @Transactional()
@@ -45,7 +57,7 @@ export class CartResolver {
     @Args('input') input: UpdateCartItemInput,
     @CurrentUser() user: User,
   ) {
-    return this.cartService.updateCartItem(user, input);
+    // return this.cartService.updateCartItem(user, input);
   }
 
   @Auth()
@@ -55,7 +67,6 @@ export class CartResolver {
     @Args('cartItemId') cartItemId: string,
     @CurrentUser() user: User,
   ) {
-    return this.cartService.removeFromCart(user, cartItemId);
+    // return this.cartService.removeFromCart(user, cartItemId);
   }
 }
-

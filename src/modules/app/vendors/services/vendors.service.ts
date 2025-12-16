@@ -6,7 +6,6 @@ import { VendorStatus } from '../enums/vendor-status.enum';
 import { RequestVendorInput } from '../dtos/inputs/request-vendor.input';
 import { InjectAppRepository } from 'src/common/decorators/inject-app-repository.decorator';
 import { AppRepository } from 'src/modules/core/app-database/repositories/app.repository';
-import { AdminGroup } from '../../auth-base/admin-group/entities/admin-group.entity';
 import { MailService } from 'src/modules/core/mail/services/mail.service';
 import { MailSubjectEnum } from 'src/modules/core/mail/enums/mail-subject.enum';
 import { MailTemplateEnum } from 'src/modules/core/mail/enums/mail-template.enum';
@@ -19,7 +18,7 @@ import { Review } from '../../reviews/entities/review.entity';
 import { VendorProductsInput } from '../dtos/inputs/vendor-products.input';
 import { VendorOrdersInput } from '../dtos/inputs/vendor-orders.input';
 import { VendorReviewsInput } from '../dtos/inputs/vendor-reviews.input';
-import { FindOptionsWhere, Like } from 'typeorm';
+import { FindOptionsRelations, FindOptionsWhere, Like } from 'typeorm';
 import { OrderItem } from '../../orders/entities/order-item.entity';
 import { OrderStatus } from '../../orders/enum/order-status.enum';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
@@ -39,8 +38,6 @@ export class VendorService {
     private readonly orderItemRepo: AppRepository<OrderItem>,
     @InjectAppRepository(Review)
     private readonly reviewRepo: AppRepository<Review>,
-    @InjectAppRepository(AdminGroup)
-    private readonly adminGroupRepo: AppRepository<AdminGroup>,
     private readonly mailService: MailService,
     private readonly notificationService: NotificationService,
   ) {}
@@ -93,10 +90,6 @@ export class VendorService {
 
     const userEmail = vendor.user.email as string;
     if (status === VendorStatus.VERIFIED) {
-      // const adminGroup = await this.adminGroupRepo.findOneByOrFail({
-      //   scope: AdminGroupScopeEnum.PRODUCTS_AND_ORDERS,
-      // });
-      // vendor.user.adminGroup = adminGroup;
       vendor.user.role = UserRoleEnum.VENDOR;
       await this.userRepo.save(vendor.user);
 
@@ -161,10 +154,7 @@ export class VendorService {
   }
 
   async vendorProducts(vendorId: string, pagination: VendorProductsInput) {
-    const page = pagination?.page || 1;
-    const limit = pagination?.limit || 10;
-    const name = pagination?.name;
-
+    const { name, limit, page } = pagination;
     const where: FindOptionsWhere<Product> = {
       vendor: { id: vendorId },
     };
@@ -182,9 +172,7 @@ export class VendorService {
   }
 
   async vendorOrders(vendorId: string, pagination: VendorOrdersInput) {
-    const page = pagination?.page || 1;
-    const limit = pagination?.limit || 10;
-    const status = pagination?.status;
+    const { page, limit, status } = pagination;
 
     const where: FindOptionsWhere<OrderItem> = {
       vendor: { id: vendorId },
@@ -199,14 +187,15 @@ export class VendorService {
       { createdAt: 'DESC' },
       page,
       limit,
+      {
+        order: true,
+        product: true,
+      },
     );
   }
 
   async vendorReviews(vendorId: string, pagination: VendorReviewsInput) {
-    const page = pagination?.page || 1;
-    const limit = pagination?.limit || 10;
-    const rating = pagination?.rating;
-
+    const { page, limit, rating } = pagination;
     const where: FindOptionsWhere<Review> = {
       vendor: { id: vendorId },
     };
@@ -220,6 +209,9 @@ export class VendorService {
       { createdAt: 'DESC' },
       page,
       limit,
+      {
+        user: true,
+      },
     );
   }
 }
