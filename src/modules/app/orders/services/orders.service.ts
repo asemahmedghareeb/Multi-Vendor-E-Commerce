@@ -14,7 +14,6 @@ import { CreateOrderInput } from '../dto/inputs/create-order.input';
 import { OrderStatus } from '../enum/order-status.enum';
 import { OrderTracking } from '../entities/order-tracking.entity';
 import { PaymentService } from 'src/modules/core/payment/services/payment.service';
-import { PaymentGatewaysEnum } from 'src/modules/core/payment/enums/payment-gateways.enum';
 import { AppConfig } from 'src/config/app.config';
 import { CurrenciesEnum } from 'src/common/enums/currency.enum';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
@@ -50,7 +49,10 @@ export class OrdersService {
     );
   }
 
-  async createOrder(user: User, input: CreateOrderInput): Promise<Order> {
+  async createOrder(
+    user: User,
+    input: CreateOrderInput,
+  ): Promise<Order> {
     const cart = await this.cartRepo.findOneOrFail({
       where: { user: { id: user.id } },
       relations: ['items', 'user', 'items.product', 'items.product.vendor'],
@@ -123,7 +125,8 @@ export class OrdersService {
     await this.orderTrackingRepo.save(trackingRecords);
 
     const payment = await this.paymentService.createPaymentIntent(
-      PaymentGatewaysEnum.STRIPE,
+      // PaymentGatewaysEnum.STRIPE,
+      input.paymentGateway,
       savedOrder.totalAmount,
       AppConfig.appGeneralCurrency as CurrenciesEnum,
       { order_id: savedOrder.id },

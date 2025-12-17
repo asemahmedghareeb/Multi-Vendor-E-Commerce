@@ -7,7 +7,6 @@ import { CartItem } from '../cart/entities/cart-item.entity';
 import { User } from '../auth-base/user/entities/user.entity';
 import { Vendor } from '../vendors/entities/vendor.entity';
 import { Payment } from 'src/modules/core/payment/entities/payment.entity';
-import { CartModule } from '../cart/cart.module';
 import { AppDatabaseModule } from 'src/modules/core/app-database/app-database.module';
 import { Order } from './entities/order.entity';
 import { OrdersService } from './services/orders.service';
@@ -17,11 +16,12 @@ import { OrderItemService } from './services/order-item.service';
 import { UserDataloader } from '../auth-base/session/dataloaders/user.dataloader';
 import { OrderItemResolver } from './resolvers/order-item.resolver';
 import { OrderItemsLoader } from './dataloaders/order-items.dataloader';
-import { ProductsDataloader } from '../cart/dataloaders/product.dataloader';
+import { ProductsDataloader } from './dataloaders/product.dataloader';
 import { VendorDataloader } from '../product/dataloaders/vendor.dataloader';
 import { OrderDataloader } from './dataloaders/order.dataloader';
 import { PaymentDataloader } from './dataloaders/payment.dataloader';
-
+import { PaymentModule } from 'src/modules/core/payment/payment.module';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   imports: [
@@ -36,8 +36,9 @@ import { PaymentDataloader } from './dataloaders/payment.dataloader';
       Vendor,
       Payment,
     ]),
-    CartModule,
     VendorsModule,
+    PaymentModule,
+    NotificationModule,
   ],
   providers: [
     OrdersResolver,
@@ -50,6 +51,7 @@ import { PaymentDataloader } from './dataloaders/payment.dataloader';
     VendorDataloader,
     OrderDataloader,
     PaymentDataloader,
+    ProductsDataloader,
   ],
   exports: [OrdersService],
 })

@@ -7,6 +7,8 @@ import { AppRepository } from 'src/modules/core/app-database/repositories/app.re
 import { InjectAppRepository } from 'src/common/decorators/inject-app-repository.decorator';
 import { AppHttpException } from 'src/common/exceptions/app-http.exception';
 import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
+import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
+import { FindOptionsRelations } from 'typeorm';
 
 @Injectable()
 export class WishlistService {
@@ -17,28 +19,25 @@ export class WishlistService {
     private wishlistItemRepo: AppRepository<WishlistItem>,
     @InjectAppRepository(Product)
     private productRepo: AppRepository<Product>,
-    @InjectAppRepository(User)
-    private userRepo: AppRepository<User>,
   ) {}
 
-  async getWishlist(userId: string): Promise<Wishlist> {
+  async getWishlist(user: User, pagination: PaginatorInput) {
+    const { page, limit } = pagination;
     let wishlist = await this.wishlistRepo.findOne({
-      where: { user: { id: userId } },
-      relations: ['items', 'items.product'],
-      order: { items: { createdAt: 'DESC' } },
+      where: { user: { id: user.id } },
+      order: { items: { createdAt: 'ASC' } },
     });
-
     if (!wishlist) {
-      const user = await this.userRepo.findOneOrFail({ where: { id: userId } });
-
-      wishlist = this.wishlistRepo.create({
-        user: user,
-        items: [],
-      });
-      await this.wishlistRepo.save(wishlist);
+      wishlist = await this.createWishlist(user);
+      return wishlist;
     }
-
-    return wishlist;
+    return this.wishlistItemRepo.findPaginated(
+      { wishlist: { id: wishlist.id } },
+      { createdAt: 'DESC' },
+      page,
+      limit,
+      ['product', 'product.vendor'] as FindOptionsRelations<WishlistItem>,
+    );
   }
 
   async createWishlist(user: User) {

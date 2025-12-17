@@ -89,6 +89,7 @@ export class OrdersResolver {
 
     return this.orderItemsLoader.getDataloader().load(order.id);
   }
+  
   @ResolveField(() => User)
   async user(@Parent() order: Order) {
     if (order.user) return order.user;

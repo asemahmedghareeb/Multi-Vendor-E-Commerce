@@ -7,6 +7,7 @@ import { User } from '../auth-base/user/entities/user.entity';
 import { Order } from '../orders/entities/order.entity';
 import { AppDatabaseModule } from 'src/modules/core/app-database/app-database.module';
 import { WalletsResolver } from './resolvers/wallet.resolver';
+import { Vendor } from '../vendors/entities/vendor.entity';
 
 @Module({
   imports: [
@@ -16,7 +17,9 @@ import { WalletsResolver } from './resolvers/wallet.resolver';
       Order,
       User,
       OrderItem,
+      Vendor
     ]),
+
   ],
   providers: [WalletsResolver, WalletsService],
   exports: [WalletsService],

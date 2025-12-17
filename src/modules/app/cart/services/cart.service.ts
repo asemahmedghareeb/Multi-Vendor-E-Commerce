@@ -22,12 +22,10 @@ export class CartService {
     @InjectAppRepository(User) private userRepo: AppRepository<User>,
   ) {}
 
-
   async getCart(user: User, pagination: PaginatorInput) {
     const { page, limit } = pagination;
     let cart = await this.cartRepo.findOne({
       where: { user: { id: user.id } },
-      relations: ['items', 'items.product', 'items.product.vendor'],
       order: { items: { createdAt: 'ASC' } },
     });
     if (!cart) {
@@ -113,37 +111,47 @@ export class CartService {
     return cart;
   }
 
-  // async updateCartItem(user: User, input: UpdateCartItemInput): Promise<Cart> {
-  //   const userId = user.id;
-  //   const cart = await this.getCart(userId);
+  async updateCartItem(
+    user: User,
+    input: UpdateCartItemInput,
+  ): Promise<boolean> {
+    const userId = user.id;
+    const cart = await this.cartRepo.findOneOrFail({
+      where: { user: { id: userId } },
+      relations: ['items', 'items.product'],
+    });
 
-  //   const cartItem = await this.cartItemRepo.findOneOrFail({
-  //     where: { id: input.cartItemId, cart: { id: cart.id } },
-  //     relations: ['product'],
-  //   });
+    const cartItem = cart.items.find((item) => item.id === input.cartItemId);
+    if (!cartItem) {
+      throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
+    }
 
-  //   if (cartItem.product.inventoryCount < input.quantity) {
-  //     throw new AppHttpException(ErrorCodeEnum.INSUFFICIENT_INVENTORY, {
-  //       count: cartItem.product.inventoryCount,
-  //     });
-  //   }
-  //   cartItem.quantity = input.quantity;
-  //   await this.cartItemRepo.save(cartItem);
-  //   // return this.getCart(userId);
-  // }
+    if (cartItem.product.inventoryCount < input.quantity) {
+      throw new AppHttpException(ErrorCodeEnum.INSUFFICIENT_INVENTORY, {
+        count: cartItem.product.inventoryCount,
+      });
+    }
+    cartItem.quantity = input.quantity;
+    await this.cartItemRepo.save(cartItem);
+    return true;
+  }
 
-  // async removeFromCart(user: User, cartItemId: string): Promise<Cart> {
-  //   const userId = user.id;
-  //   // const cart = await this.getCart(userId);
+  async removeFromCart(user: User, cartItemId: string): Promise<boolean> {
+    const cart = await this.cartRepo.findOneOrFail({
+      where: { user: { id: user.id } },
+      relations: ['items', 'items.product'],
+    });
 
-  //   const result = await this.cartItemRepo.delete({
-  //     id: cartItemId,
-  //     cart: { id: cart.id },
-  //   });
+    const cartItem = cart.items.find((item) => item.id === cartItemId);
+    if (!cartItem) {
+      throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
+    }
+    cart.items = cart.items.filter((item) => item.id !== cartItemId);
+    cart.totalAmount = cart.items.reduce((sum, item) => {
+      return sum + item.quantity * item.product.price;
+    }, 0);
+    await this.cartRepo.save(cart);
 
-  //   if (result.affected === 0)
-  //     throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
-
-  //   return this.getCart(userId);
-  // }
+    return true;
+  }
 }

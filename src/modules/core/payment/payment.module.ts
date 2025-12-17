@@ -6,9 +6,15 @@ import { ConfigService } from '@nestjs/config';
 import { AppDatabaseModule } from '../app-database/app-database.module';
 import { Payment } from './entities/payment.entity';
 import { Order } from 'src/modules/app/orders/entities/order.entity';
+import { WalletModule } from 'src/modules/app/wallet/wallet.module';
+import { OrderItem } from 'src/modules/app/orders/entities/order-item.entity';
+import { Refund } from './entities/refund.entity';
 
 @Module({
-  imports: [AppDatabaseModule.forFeature([Payment, Order])],
+  imports: [
+    AppDatabaseModule.forFeature([Payment, Order, OrderItem, Refund]),
+    WalletModule,
+  ],
   providers: [
     PaymentService,
     StripeStrategy,
@@ -16,10 +22,9 @@ import { Order } from 'src/modules/app/orders/entities/order.entity';
       provide: 'STRIPE_CLIENT',
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const stripe = require('stripe')(
+        return require('stripe')(
           configService.getOrThrow<string>('STRIPE_SECRET_KEY'),
         );
-        return stripe;
       },
     },
   ],

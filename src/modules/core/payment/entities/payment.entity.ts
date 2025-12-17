@@ -11,7 +11,7 @@ import {
 import { PaymentStatusEnum } from '../enums/payment-status.enum';
 import { AppBaseEntity } from '../../app-database/entities/app-base.entity';
 import { PaymentGatewaysEnum } from '../enums/payment-gateways.enum';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Float, ObjectType } from '@nestjs/graphql';
 import { Order } from 'src/modules/app/orders/entities/order.entity';
 import { Refund } from './refund.entity';
 
@@ -55,6 +55,15 @@ export class Payment extends AppBaseEntity {
 
   @Column()
   userId: string;
+
+  @Field(() => Float)
+  @Column({
+    name: 'amount_refunded',
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (v) => v, from: (v) => parseInt(v, 10) },
+  })
+  amountRefunded: number;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'userId' })

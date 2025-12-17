@@ -12,13 +12,23 @@ import { Request } from 'express';
 import { AppHttpException } from 'src/common/exceptions/app-http.exception';
 import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
 import { Order } from 'src/modules/app/orders/entities/order.entity';
+import { OrderItem } from 'src/modules/app/orders/entities/order-item.entity';
+import { CreateRefundInput } from '../inputs/create-refund.input';
+import { Refund } from '../entities/refund.entity';
+import { WalletsService } from 'src/modules/app/wallet/services/wallet.service';
+import { OrderStatus } from 'src/modules/app/orders/enum/order-status.enum';
+import { PaymentStatusEnum } from '../enums/payment-status.enum';
 
 @Injectable()
 export class PaymentService {
   constructor(
     @InjectAppRepository(Payment)
     private readonly paymentRepository: AppRepository<Payment>,
-    @InjectAppRepository(Order)
+    @InjectAppRepository(OrderItem)
+    private readonly orderItemRepository: AppRepository<OrderItem>,
+    @InjectAppRepository(Refund)
+    private readonly refundRepository: AppRepository<Refund>,
+    private readonly walletsService: WalletsService,
     private readonly moduleRef: ModuleRef,
   ) {}
 
@@ -76,46 +86,146 @@ export class PaymentService {
       where: {
         externalId: paymentInfo.externalId,
       },
+      relations: ['order', 'order.items'],
     });
 
     if (!payment) throw new AppHttpException(ErrorCodeEnum.SERVER_SIDE_ERROR);
 
-    await this.paymentRepository.updateOneFromExistingModel(payment, {
-      paymentStatus: paymentInfo.status,
-    });
+    const isNewSuccess =
+      payment.paymentStatus !== PaymentStatusEnum.SUCCEEDED &&
+      paymentInfo.status === PaymentStatusEnum.SUCCEEDED;
+
+    if (payment.paymentStatus !== paymentInfo.status) {
+      await this.paymentRepository.updateOneFromExistingModel(payment, {
+        paymentStatus: paymentInfo.status,
+      });
+    }
+
+    if (isNewSuccess && payment.order) {
+      await this.walletsService.processOrderRevenue(payment.order);
+    }
   }
+
+
+
   //add the wallet logic here
-  async refundPayment(paymentId: string) {
+  async RefundPaymentPartially(input: CreateRefundInput) {
+    const { paymentId, items, reason } = input;
     const payment = await this.paymentRepository.findOneOrFail(
       {
         where: {
           id: paymentId,
         },
+        relations: ['order'],
       },
       ErrorCodeEnum.PAYMENT_DOES_NOT_EXIST,
     );
+
+    let totalRefundAmount = 0;
+    const itemsToProcess: { orderItem: OrderItem; quantity: number }[] = [];
+
+    for (const itemInput of items) {
+      const orderItem = await this.orderItemRepository.findOneOrFail({
+        where: {
+          id: itemInput.orderItemId,
+          order: { id: payment.order.id },
+        },
+        // relations: ['product', 'vendor'],
+      });
+
+      if (itemInput.quantity > orderItem.quantity) {
+        throw new AppHttpException(ErrorCodeEnum.BAD_REQUEST_EXCEPTION);
+      }
+
+      totalRefundAmount += orderItem.priceAtPurchase * itemInput.quantity;
+
+      itemsToProcess.push({
+        orderItem,
+        quantity: itemInput.quantity,
+      });
+    }
 
     const paymentStrategyClass = paymentStrategies[payment.paymentGateway];
     const paymentStrategy =
       this.moduleRef.get<PaymentStrategy>(paymentStrategyClass);
 
-    await paymentStrategy.refund(payment.externalId);
+    const stripeRefund = await paymentStrategy.refund(
+      payment.externalId,
+      totalRefundAmount,
+    );
+
+    const refund = this.refundRepository.create({
+      payment,
+      amount: totalRefundAmount,
+      paymentRefundId: stripeRefund.id,
+      reason: reason,
+      status: stripeRefund.status,
+    });
+    await this.refundRepository.save(refund);
+
+    payment.amountRefunded += totalRefundAmount;
+    await this.paymentRepository.save(payment);
+
+    for (const { orderItem } of itemsToProcess) {
+      orderItem.status = OrderStatus.RETURNED;
+      await this.orderItemRepository.save(orderItem);
+    }
+
+    await this.walletsService.refundSpecificItems(
+      payment.order,
+      itemsToProcess,
+    );
+
+    return refund;
   }
 
-  async RefundPaymentPartially(paymentId: string, amount: number) {
-    const payment = await this.paymentRepository.findOneOrFail(
-      {
-        where: {
-          id: paymentId,
-        },
-      },
-      ErrorCodeEnum.PAYMENT_DOES_NOT_EXIST,
-    );
+  async refundPayment(paymentId: string, reason?: string) {
+    const payment = await this.paymentRepository.findOneOrFail({
+      where: { id: paymentId },
+      relations: [
+        'order',
+        'order.items',
+      ],
+    });
+
+    if (payment.amountRefunded >= payment.amount) {
+      throw new AppHttpException(ErrorCodeEnum.BAD_REQUEST_EXCEPTION);
+    }
+
+    const remainingAmountToRefund = payment.amount - payment.amountRefunded;
+
+    const itemsToRefund = payment.order.items
+      .filter((item) => item.refundedQuantity < item.quantity)
+      .map((item) => ({
+        orderItem: item,
+        quantity: item.quantity - item.refundedQuantity,
+      }));
+
+    // if there are no items to refund, but the remaining amount to refund is greater than 0 (example shipping fee)
+    if (itemsToRefund.length === 0 && remainingAmountToRefund > 0) {
+      console.warn('Money remains but items are marked refunded');
+    }
 
     const paymentStrategyClass = paymentStrategies[payment.paymentGateway];
     const paymentStrategy =
       this.moduleRef.get<PaymentStrategy>(paymentStrategyClass);
 
-    await paymentStrategy.refund(payment.externalId, amount);
+    const stripeRefund = await paymentStrategy.refund(payment.externalId);
+
+    const refund = this.refundRepository.create({
+      payment,
+      amount: remainingAmountToRefund,
+      paymentRefundId: stripeRefund.id,
+      reason: reason || 'Full Refund (Remaining Balance)',
+      status: stripeRefund.status,
+    });
+    await this.refundRepository.save(refund);
+
+    payment.amountRefunded += remainingAmountToRefund;
+    await this.paymentRepository.save(payment);
+
+    await this.walletsService.refundSpecificItems(payment.order, itemsToRefund);
+
+    return refund;
   }
 }

@@ -96,10 +96,10 @@ export class StripeStrategy implements PaymentStrategy {
     };
   }
 
-  async refund(externalId: string, amount?: number): Promise<void> {
-    await this.stripeClient.refunds.create({
+  async refund(externalId: string, amount?: number): Promise<any> {
+    return await this.stripeClient.refunds.create({
       payment_intent: externalId,
     });
-  }
 
+  }
 }

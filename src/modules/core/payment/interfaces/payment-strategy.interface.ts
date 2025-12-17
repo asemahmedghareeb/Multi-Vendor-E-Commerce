@@ -15,5 +15,5 @@ export interface PaymentStrategy {
     req?: Request,
   ): Promise<PaymentInfo | void>;
 
-  refund(externalId: string, amount?: number): Promise<void>;
+  refund(externalId: string, amount?: number): Promise<any>;
 }

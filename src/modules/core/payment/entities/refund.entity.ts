@@ -25,7 +25,7 @@ export class Refund extends AppBaseEntity {
 
   @Field()
   @Column()
-  paymentRefundId: string;
+  paymentRefundId: string; //ex stripe refund id
 
   @Field(() => Payment)
   @ManyToOne(() => Payment, (payment) => payment.refunds)

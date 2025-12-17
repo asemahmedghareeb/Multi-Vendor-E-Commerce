@@ -5,6 +5,7 @@ import { AddToWishlistInput } from '../dto/inputs/add-to-wishlist.input';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { User } from '../../auth-base/user/entities/user.entity';
+import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
 
 @Resolver(() => Wishlist)
 export class WishlistResolver {
@@ -12,8 +13,8 @@ export class WishlistResolver {
 
   @Query(() => Wishlist)
   @Auth()
-  async myWishlist(@CurrentUser() user: { userId: string }) {
-    return this.wishlistService.getWishlist(user.userId);
+  async myWishlist(@CurrentUser() user: User, pagination: PaginatorInput) {
+    return this.wishlistService.getWishlist(user, pagination);
   }
 
   @Mutation(() => Wishlist)

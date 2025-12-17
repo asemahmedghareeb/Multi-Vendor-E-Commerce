@@ -3,10 +3,7 @@ import {
   Query,
   Mutation,
   Args,
-  ResolveField,
-  Root,
 } from '@nestjs/graphql';
-
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { Cart } from '../entities/cart.entity';
@@ -27,19 +24,6 @@ export class CartResolver {
     return this.cartService.getCart(user, pagination);
   }
 
-  // @ResolveField(() => CartItemPaginated)
-  // async items(
-  //   @Root() cart: Cart,
-  //   @Args('paginate', {
-  //     type: () => PaginatorInput,
-  //     nullable: true,
-  //     defaultValue: { page: 1, limit: 15 },
-  //   })
-  //   paginatorInput: PaginatorInput,
-  // ): Promise<CartItemPaginated> {
-  //   return this.cartService.getCartItems(cart.id, paginatorInput);
-  // }
-
   @Auth()
   @Mutation(() => Cart)
   @Transactional()
@@ -49,7 +33,7 @@ export class CartResolver {
   ) {
     return this.cartService.addToCart(user, input);
   }
-
+  
   @Auth()
   @Mutation(() => Cart)
   @Transactional()
@@ -57,9 +41,9 @@ export class CartResolver {
     @Args('input') input: UpdateCartItemInput,
     @CurrentUser() user: User,
   ) {
-    // return this.cartService.updateCartItem(user, input);
+    return this.cartService.updateCartItem(user, input);
   }
-
+  
   @Auth()
   @Mutation(() => Cart)
   @Transactional()
@@ -67,6 +51,6 @@ export class CartResolver {
     @Args('cartItemId') cartItemId: string,
     @CurrentUser() user: User,
   ) {
-    // return this.cartService.removeFromCart(user, cartItemId);
+    return this.cartService.removeFromCart(user, cartItemId);
   }
 }
