@@ -25,6 +25,8 @@ import { PaginatedVendorOrders } from '../dtos/responses/paginated-vendor-orders
 import { VendorOrdersInput } from '../dtos/inputs/vendor-orders.input';
 import { PaginatedVendorReviews } from '../dtos/responses/paginated-vendor-reviews.type';
 import { VendorReviewsInput } from '../dtos/inputs/vendor-reviews.input';
+import { ParseUUIDPipe } from '@nestjs/common';
+import { parse } from 'path';
 
 @Resolver(() => Vendor)
 export class VendorsResolver {
@@ -53,7 +55,7 @@ export class VendorsResolver {
   })
   @Transactional()
   @Mutation(() => Vendor)
-  async approveVendor(@Args('userId') userId: string) {
+  async approveVendor(@Args('userId', ParseUUIDPipe) userId: string) {
     return this.vendorService.updateVendorStatus(userId, VendorStatus.VERIFIED);
   }
 
@@ -85,7 +87,7 @@ export class VendorsResolver {
   @Auth()
   @Query(() => PaginatedVendorProducts)
   async vendorProducts(
-    @Args('vendorId', { type: () => String }) vendorId: string,
+    @Args('vendorId', ParseUUIDPipe) vendorId: string,
     @Args('pagination') pagination: VendorProductsInput,
   ) {
     return this.vendorService.vendorProducts(vendorId, pagination);
@@ -94,7 +96,7 @@ export class VendorsResolver {
   @Auth({ roles: [UserRoleEnum.ADMIN] })
   @Query(() => PaginatedVendorOrders)
   async vendorOrders(
-    @Args('vendorId', { type: () => String }) vendorId: string,
+    @Args('vendorId', ParseUUIDPipe) vendorId: string,
     @Args('pagination') pagination: VendorOrdersInput,
   ) {
     return this.vendorService.vendorOrders(vendorId, pagination);

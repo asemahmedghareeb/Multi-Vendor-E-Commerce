@@ -9,4 +9,7 @@ export const FileModelUseCaseValidatorOptions: {
     FileUseCaseEnum.DOC_TEST,
     FileUseCaseEnum.IMAGE_TEST,
   ],
+  product: [
+    FileUseCaseEnum.PRODUCT_IMAGE,
+  ],
 };

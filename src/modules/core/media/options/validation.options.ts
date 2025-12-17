@@ -17,6 +17,11 @@ export const ValidationOptions: {
     5 * 1024 * 1024,
     ErrorCodeEnum.INVALID_FILE_UPLOAD,
   ),
+  product_image: generateFileValidationOptions(
+    [FileTypeEnum.PNG, FileTypeEnum.JPG, FileTypeEnum.JPEG],
+    5 * 1024 * 1024,
+    ErrorCodeEnum.INVALID_FILE_UPLOAD,
+  ),
   video_test: generateFileValidationOptions(
     [FileTypeEnum.MP4],
     100 * 1024 * 1024,

@@ -1,22 +1,37 @@
-import { Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
-import { Mutation, Args } from '@nestjs/graphql';
-import { Product } from '../entities/product.entity';
-import { ProductService } from '../services/product.service';
+import {
+  Args,
+  ID,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
+import { Transactional } from 'typeorm-transactional';
 import { Auth } from 'src/common/decorators/auth.decorator';
-import { CreateProductInput } from '../dto/inputs/create-product.input';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { DefaultPermissionActionsEnum } from 'src/common/enums/default-permissions.enum';
+import { UserRoleEnum } from 'src/common/enums/user-role.enum';
 import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
+import { User } from '../../auth-base/user/entities/user.entity';
+import { Category } from '../../categories/entities/category.entity';
+import { Vendor } from '../../vendors/entities/vendor.entity';
+import { CategoryLoader } from '../dataloaders/category.dataloader';
+import { VendorDataloader } from '../dataloaders/vendor.dataloader';
+import { CreateProductInput } from '../dto/inputs/create-product.input';
 import { GetProductsFilterInput } from '../dto/inputs/product-filter.input';
 import { UpdateProductInput } from '../dto/inputs/Update-product-Input';
 import { ProductPaginated } from '../dto/responses/paginated-products';
-import { Vendor } from '../../vendors/entities/vendor.entity';
-import { Category } from '../../categories/entities/category.entity';
-import { User } from '../../auth-base/user/entities/user.entity';
-import { DefaultPermissionActionsEnum } from 'src/common/enums/default-permissions.enum';
-import { Transactional } from 'typeorm-transactional';
-import { VendorDataloader } from '../dataloaders/vendor.dataloader';
-import { CategoryLoader } from '../dataloaders/category.dataloader';
-import { UserRoleEnum } from 'src/common/enums/user-role.enum';
+import { Product } from '../entities/product.entity';
+import { ProductService } from '../services/product.service';
+import { PresignedUrlService } from 'src/modules/core/media/services/presigned-url.service';
+import { GeneratePresignedUrlInput } from 'src/modules/core/media/dtos/inputs/generate-presigned-url.input';
+import { FileUseCaseEnum } from 'src/modules/core/media/enums/file-use-case.enum';
+import { InjectAppRepository } from 'src/common/decorators/inject-app-repository.decorator';
+import { AppRepository } from 'src/modules/core/app-database/repositories/app.repository';
+import { File } from 'src/modules/core/media/entities/file.entity';
+import { PresignedUrlPayload } from '../dto/responses/presigned-url-payload';
+import { ParseUUIDPipe } from '@nestjs/common';
 
 @Resolver(() => Product)
 export class ProductsResolver {
@@ -24,10 +39,43 @@ export class ProductsResolver {
     private readonly productService: ProductService,
     private readonly vendorDataLoader: VendorDataloader,
     private readonly categoryLoader: CategoryLoader,
+    private readonly presignedUrlService: PresignedUrlService,
+    @InjectAppRepository(File)
+    private readonly fileRepository: AppRepository<File>,
   ) {}
 
   @Auth({
-    roles:[UserRoleEnum.ADMIN, UserRoleEnum.VENDOR],
+    roles: [UserRoleEnum.VENDOR],
+  })
+  @Mutation(() => PresignedUrlPayload)
+  @Transactional()
+  async generateProductImageUploadUrl(
+    @Args('input') input: GeneratePresignedUrlInput,
+  ): Promise<PresignedUrlPayload> {
+    const { presignedUrl, file } =
+      await this.presignedUrlService.getUploadPresignedUrl({
+        ...input,
+        fileUseCase: FileUseCaseEnum.PRODUCT_IMAGE,
+      });
+
+    return { presignedUrl, fileId: file.id };
+  }
+
+  @Auth({
+    roles: [UserRoleEnum.VENDOR],
+  })
+  @Mutation(() => Product)
+  @Transactional()
+  async assignProductImage(
+    @Args('productId', { type: () => ID }) productId: string,
+    @Args('fileId', { type: () => ID }) fileId: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.productService.assignImage(user, productId, fileId);
+  }
+
+  @Auth({
+    roles: [UserRoleEnum.ADMIN, UserRoleEnum.VENDOR],
     permissions: [
       {
         action: DefaultPermissionActionsEnum.CREATE,
@@ -64,15 +112,12 @@ export class ProductsResolver {
 
   @Auth()
   @Query(() => Product)
-  async product(@Args('id', { type: () => String }) id: string) {
+  async product(@Args('id', ParseUUIDPipe) id: string) {
     return this.productService.findOne(id);
   }
 
-
-
-  
   @Auth({
-    roles:[UserRoleEnum.ADMIN, UserRoleEnum.VENDOR],
+    roles: [UserRoleEnum.ADMIN, UserRoleEnum.VENDOR],
     permissions: [
       {
         action: DefaultPermissionActionsEnum.UPDATE,
@@ -89,10 +134,8 @@ export class ProductsResolver {
     return this.productService.update(user, updateProductInput);
   }
 
-
-
   @Auth({
-    roles:[UserRoleEnum.ADMIN, UserRoleEnum.VENDOR],
+    roles: [UserRoleEnum.ADMIN, UserRoleEnum.VENDOR],
     permissions: [
       {
         action: DefaultPermissionActionsEnum.DELETE,
@@ -103,10 +146,32 @@ export class ProductsResolver {
   @Mutation(() => Boolean)
   @Transactional()
   async removeProduct(
-    @Args('id', { type: () => String }) id: string,
+    @Args('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: User,
   ) {
     return this.productService.remove(user, id);
+  }
+
+  @ResolveField(() => [String], { nullable: 'itemsAndList' })
+  async images(@Parent() product: Product) {
+    if (!product.images?.length) {
+      return [];
+    }
+
+    // This is not the most optimal solution, as it can lead to N+1 problems.
+    // A better approach would be to use a DataLoader to batch fetch files.
+    // However, for simplicity, we are fetching them one by one here.
+    const files = await this.fileRepository.findByIds(product.images);
+
+    if (!files.length) return [];
+
+    const urls = await Promise.all(
+      files.map((file) =>
+        this.presignedUrlService.getDownloadPresignedUrl(file),
+      ),
+    );
+
+    return urls;
   }
 
   @ResolveField(() => Vendor)

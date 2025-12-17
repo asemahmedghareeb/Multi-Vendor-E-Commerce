@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { User } from '../../auth-base/user/entities/user.entity';
 import { Cart } from '../entities/cart.entity';
 import { CartItem } from '../entities/cart-item.entity';
@@ -11,6 +11,9 @@ import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
 import { AppHttpException } from 'src/common/exceptions/app-http.exception';
 import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
 import { FindOptionsRelations } from 'typeorm';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class CartService {
@@ -20,7 +23,39 @@ export class CartService {
     private cartItemRepo: AppRepository<CartItem>,
     @InjectAppRepository(Product) private productRepo: AppRepository<Product>,
     @InjectAppRepository(User) private userRepo: AppRepository<User>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
+
+  private getCartCacheKey(userId: string): string {
+    return `cart:${userId}`;
+  }
+
+  async getCartForUser(userId: string): Promise<Cart> {
+    const cacheKey = this.getCartCacheKey(userId);
+
+    const cachedData = await this.cacheManager.get<string>(cacheKey);
+    if (cachedData) {
+      console.log('cart from cache');
+      return cachedData as unknown as Cart; 
+    }
+
+    // 2. Fetch from DB if miss
+    let cart = await this.cartRepo.findOne({
+      where: { user: { id: userId } },
+      relations: ['items', 'items.product', 'items.product.vendor'],
+    });
+
+    if (!cart) {
+      const user = await this.userRepo.findOneOrFail({ where: { id: userId } });
+      cart = await this.createCart(user);
+    }
+
+    const safeCart = instanceToPlain(cart);
+
+    await this.cacheManager.set(cacheKey, safeCart, 3600000);
+
+    return cart;
+  }
 
   async getCart(user: User, pagination: PaginatorInput) {
     const { page, limit } = pagination;
@@ -30,7 +65,6 @@ export class CartService {
     });
     if (!cart) {
       cart = await this.createCart(user);
-      return cart;
     }
     return this.cartItemRepo.findPaginated(
       { cart: { id: cart.id } },
@@ -107,6 +141,7 @@ export class CartService {
     }, 0);
 
     await this.cartRepo.save(cart);
+    await this.cacheManager.del(this.getCartCacheKey(user.id));
 
     return cart;
   }
@@ -133,6 +168,7 @@ export class CartService {
     }
     cartItem.quantity = input.quantity;
     await this.cartItemRepo.save(cartItem);
+    await this.cacheManager.del(this.getCartCacheKey(user.id));
     return true;
   }
 
@@ -151,6 +187,7 @@ export class CartService {
       return sum + item.quantity * item.product.price;
     }, 0);
     await this.cartRepo.save(cart);
+    await this.cacheManager.del(this.getCartCacheKey(user.id));
 
     return true;
   }

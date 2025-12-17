@@ -7,4 +7,5 @@ export const FileGuardOptions: {
   [key in FileModelEnum]: Type<FileAuthGuardStrategy>;
 } = {
   public_test: TestFileAuthGuard,
+  [FileModelEnum.PRODUCT]: TestFileAuthGuard,
 };

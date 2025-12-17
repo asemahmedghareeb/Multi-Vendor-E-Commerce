@@ -75,5 +75,6 @@
   "PRODUCT_ALREADY_EXISTS": "Product already exists",
   "CATEGORY_ALREADY_EXISTS": "Category already exists",
   "CATEGORY_DOES_NOT_EXIST": "Category does not exist",
-  "VENDOR_NOT_FOUND": "Vendor not found"
+  "VENDOR_NOT_FOUND": "Vendor not found",
+  "FILE_ALREADY_IN_USE": "File already in use"
 }

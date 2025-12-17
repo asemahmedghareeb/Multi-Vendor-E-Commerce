@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   Between,
+  DataSource,
   FindOptionsWhere,
   ILike,
   In,
@@ -22,6 +23,7 @@ import { AppHttpException } from 'src/common/exceptions/app-http.exception';
 import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
 import { VendorStatus } from '../../vendors/enums/vendor-status.enum';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
+import { File } from 'src/modules/core/media/entities/file.entity';
 @Injectable()
 export class ProductService {
   constructor(
@@ -33,7 +35,40 @@ export class ProductService {
     private readonly categoryRepo: AppRepository<Category>,
     @InjectAppRepository(Follow)
     private readonly followRepo: AppRepository<Follow>,
+    @InjectAppRepository(File)
+    private readonly fileRepo: AppRepository<File>,
+
   ) {}
+
+  async assignImage(
+    user: User,
+    productId: string,
+    fileId: string,
+  ): Promise<Product> {
+      const product = await this.productRepo.findOneOrFail({
+        where: { id: productId },
+        relations: { vendor: true },
+      });
+
+      await this.checkOwnership(product, user);
+
+      const file = await this.fileRepo.findOneOrFail({
+        where: { id: fileId },
+      });
+
+      if (file.hasReference) {
+        throw new AppHttpException(ErrorCodeEnum.FILE_ALREADY_IN_USE);
+      }
+
+      product.images = [...(product.images || []), file.id];
+      file.hasReference = true;
+
+      await this.productRepo.save(product);
+      await this.fileRepo.save(file);
+
+      return product;
+    
+  }
 
   async create(userId: string, input: CreateProductInput): Promise<Product> {
     const vendor = await this.vendorRepo.findOneOrFail(

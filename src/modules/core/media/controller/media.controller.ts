@@ -14,7 +14,7 @@ import { MediaService } from '../services/media.service';
 import { Transactional } from 'typeorm-transactional';
 import { FileModelEnum } from '../enums/file-model.enum';
 import { FileAuthGuard } from '../guards/file-auth.guard';
-import { ApiBody, ApiHeader, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiHeader, ApiOkResponse } from '@nestjs/swagger';
 import { LangEnum } from 'src/common/enums/lang.enum';
 import { FileUseCaseEnum } from '../enums/file-use-case.enum';
 import { File } from '../entities/file.entity';

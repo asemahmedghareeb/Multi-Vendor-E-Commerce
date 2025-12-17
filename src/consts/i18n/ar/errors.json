@@ -75,5 +75,6 @@
   "PRODUCT_ALREADY_EXISTS": "المنتج موجود بالفعل",
   "CATEGORY_ALREADY_EXISTS": "التصنيف موجود بالفعل",
   "CATEGORY_DOES_NOT_EXIST": "التصنيف غير موجود",
-  "VENDOR_NOT_FOUND": "التاجر موجود بالفعل"
+  "VENDOR_NOT_FOUND": "التاجر موجود بالفعل",
+  "FILE_ALREADY_IN_USE": "الملف مستخدم بالفعل"
 }

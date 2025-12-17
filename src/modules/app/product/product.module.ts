@@ -8,9 +8,14 @@ import { AppDatabaseModule } from 'src/modules/core/app-database/app-database.mo
 import { VendorDataloader } from './dataloaders/vendor.dataloader';
 import { CategoryLoader } from './dataloaders/category.dataloader';
 import { Follow } from '../follow/entities/follow.entity';
+import { MediaModule } from 'src/modules/core/media/media.module';
+import { File } from 'src/modules/core/media/entities/file.entity';
 
 @Module({
-  imports: [AppDatabaseModule.forFeature([Product, Vendor, Category, Follow])],
+  imports: [
+    AppDatabaseModule.forFeature([Product, Vendor, Category, Follow, File]),
+    MediaModule,
+  ],
   providers: [
     ProductsResolver,
     ProductService,

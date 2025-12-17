@@ -24,6 +24,11 @@ export class CartResolver {
     return this.cartService.getCart(user, pagination);
   }
 
+  @Query(() => Cart)
+  async Cart(@CurrentUser() user: User) {
+    return this.cartService.getCartForUser(user.id);
+  }
+
   @Auth()
   @Mutation(() => Cart)
   @Transactional()
@@ -33,7 +38,7 @@ export class CartResolver {
   ) {
     return this.cartService.addToCart(user, input);
   }
-  
+
   @Auth()
   @Mutation(() => Cart)
   @Transactional()
@@ -43,7 +48,7 @@ export class CartResolver {
   ) {
     return this.cartService.updateCartItem(user, input);
   }
-  
+
   @Auth()
   @Mutation(() => Cart)
   @Transactional()

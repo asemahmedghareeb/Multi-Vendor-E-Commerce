@@ -1,7 +1,5 @@
 import { Request } from 'express';
 import { FileAuthGuardStrategy } from '../file-auth-guard.strategy';
-import { AppHttpException } from 'src/common/exceptions/app-http.exception';
-import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
 import { Injectable } from '@nestjs/common';
 import { GuardHelperService } from 'src/modules/core/app-helper/services/guard-helper.service';
 

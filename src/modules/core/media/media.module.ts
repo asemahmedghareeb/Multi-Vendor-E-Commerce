@@ -29,7 +29,7 @@ import { FileResolver } from './resolvers/file.resolver';
     FillValidationHookGuard,
     FileResolver,
   ],
-  exports: [],
+  exports: [PresignedUrlService],
   controllers: [MediaController],
 })
 export class MediaModule {}

@@ -1,6 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Observable } from 'rxjs';
 import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
 import { AppHttpException } from 'src/common/exceptions/app-http.exception';
 
