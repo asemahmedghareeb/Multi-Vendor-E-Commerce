@@ -73,7 +73,7 @@ export class OrdersService {
     for (const item of sortedCartItems) {
       const product = await this.productRepo.findOneOrFail({
         where: { id: item.product_id },
-        lock: { mode: 'pessimistic_write' },
+        // lock: { mode: 'pessimistic_write' },
         relations: ['vendor'],
       });
 
@@ -125,7 +125,6 @@ export class OrdersService {
     await this.orderTrackingRepo.save(trackingRecords);
 
     const payment = await this.paymentService.createPaymentIntent(
-      // PaymentGatewaysEnum.STRIPE,
       input.paymentGateway,
       savedOrder.totalAmount,
       AppConfig.appGeneralCurrency as CurrenciesEnum,
@@ -135,9 +134,12 @@ export class OrdersService {
       savedOrder,
     );
 
+
     savedOrder.payment = payment;
 
-    await this.cartItemRepo.delete({ cart: { id: cart.id } });
+        await this.orderTrackingRepo.save(trackingRecords);
+        await this.cartRepo.delete({ id: cart.id });
+
 
     return savedOrder;
   }

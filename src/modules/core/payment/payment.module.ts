@@ -9,6 +9,7 @@ import { Order } from 'src/modules/app/orders/entities/order.entity';
 import { WalletModule } from 'src/modules/app/wallet/wallet.module';
 import { OrderItem } from 'src/modules/app/orders/entities/order-item.entity';
 import { Refund } from './entities/refund.entity';
+import { RefundsResolver } from './resolvers/refund.resolver';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { Refund } from './entities/refund.entity';
   providers: [
     PaymentService,
     StripeStrategy,
+    RefundsResolver,
     {
       provide: 'STRIPE_CLIENT',
       inject: [ConfigService],

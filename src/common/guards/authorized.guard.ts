@@ -73,8 +73,6 @@ export class AuthorizedGuard implements CanActivate {
       throw new AppHttpException(ErrorCodeEnum.FORBIDDEN);
     }
 
-    console.log(currentUser.role);
-
     if (
       requiredPermissions?.length &&
       currentUser.role === UserRoleEnum.ADMIN
@@ -85,7 +83,6 @@ export class AuthorizedGuard implements CanActivate {
         new AppHttpException(ErrorCodeEnum.FORBIDDEN),
       );
     }
-
     return true;
   }
 }

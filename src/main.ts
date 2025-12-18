@@ -6,6 +6,7 @@ import { initializeTransactionalContext } from 'typeorm-transactional';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppConfig } from './config/app.config';
 import { ConsoleLogger } from '@nestjs/common';
+import * as express from 'express';
 
 async function bootstrap() {
   initializeTransactionalContext();
@@ -29,7 +30,7 @@ async function bootstrap() {
 
   }
 
-  // app.use('/payment/webhook/stripe', express.raw({ type: 'application/json' }));
+  app.use('/payment/webhook/stripe', express.raw({ type: 'application/json' }));
 
   await app.listen(process.env.PORT ?? 3000,() => 
     console.log(`Server ready at http://localhost:${process.env.PORT ?? 3000}/graphql`)

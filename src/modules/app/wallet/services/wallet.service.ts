@@ -28,40 +28,58 @@ export class WalletsService {
     private readonly vendorRepo: AppRepository<Vendor>,
   ) {}
 
+  private async findOrCreateWalletForUser(user: User): Promise<Wallet> {
+    const wallet = await this.walletRepo.findOne({
+      where: { user: { id: user.id } },
+    });
+    if (wallet) {
+      return wallet;
+    }
+    try {
+      const newWallet = this.walletRepo.create({ user, balance: 0 });
+      await this.walletRepo.save(newWallet);
+      return newWallet;
+    } catch (error) {
+      if (error.code === '23505') {
+        // Unique violation
+        return this.walletRepo.findOneOrFail({
+          where: { user: { id: user.id } },
+        });
+      }
+      throw error;
+    }
+  }
+
   @Transactional()
   async processOrderRevenue(order: Order) {
     const superAdmin = await this.userRepo.findOneOrFail({
       where: { email: process.env.SUPER_ADMIN_EMAIL },
-      relations: ['wallet'],
     });
 
     for (const item of order.items) {
-      const vendorUser = await this.userRepo.findOne({
-        where: { vendorProfile: { id: item.vendorId } },
-        relations: ['wallet', 'vendorProfile'],
+      console.log('item', item);
+      const vendor = await this.vendorRepo.findOneOrFail({
+        where: { id: item.vendorId },
+        relations: ['user'],
       });
 
-      if (!vendorUser || !vendorUser.vendorProfile) {
-        throw new AppHttpException(
-          ErrorCodeEnum.VENDOR_NOT_FOUND,
-        );
+      const vendorUser = vendor.user;
+
+      if (!vendorUser) {
+        throw new AppHttpException(ErrorCodeEnum.VENDOR_NOT_FOUND);
       }
 
-      let vendorWallet = vendorUser.wallet;
-      if (!vendorWallet) {
-        vendorWallet = this.walletRepo.create({ user: vendorUser, balance: 0 });
-        await this.walletRepo.save(vendorWallet);
-      }
+      const vendorWallet = await this.findOrCreateWalletForUser(vendorUser);
 
       const itemTotal = item.priceAtPurchase * item.quantity;
-      const commissionRate =
-        Number(vendorUser.vendorProfile.commissionRate) / 100;
+      const commissionRate = Number(vendor.commissionRate) / 100;
 
       const commissionFee = Math.floor(itemTotal * commissionRate);
       const vendorIncome = itemTotal - commissionFee;
 
       vendorWallet.balance += vendorIncome;
       await this.walletRepo.save(vendorWallet);
+      console.log('vendorWallet', vendorWallet);
 
       const vendorTx = this.txRepo.create({
         wallet: vendorWallet,
@@ -73,15 +91,7 @@ export class WalletsService {
       await this.txRepo.save(vendorTx);
 
       if (superAdmin) {
-        let adminWallet = superAdmin.wallet;
-        if (!adminWallet) {
-          adminWallet = this.walletRepo.create({
-            user: superAdmin,
-            balance: 0,
-          });
-          await this.walletRepo.save(adminWallet);
-          superAdmin.wallet = adminWallet;
-        }
+        const adminWallet = await this.findOrCreateWalletForUser(superAdmin);
 
         adminWallet.balance += commissionFee;
         await this.walletRepo.save(adminWallet);
@@ -91,9 +101,10 @@ export class WalletsService {
           order: order,
           amount: commissionFee,
           type: TransactionType.COMMISSION,
-          description: `Commission from Order #${order.id} (Vendor: ${vendorUser.vendorProfile.businessName})`,
+          description: `Commission from Order #${order.id} (Vendor: ${vendor.businessName})`,
         });
         await this.txRepo.save(adminTx);
+        console.log('adminWallet', adminWallet);
       }
 
       await this.vendorRepo.increment(
@@ -105,19 +116,8 @@ export class WalletsService {
   }
 
   async getMyWallet(userId: string): Promise<Wallet> {
-    let wallet = await this.walletRepo.findOne({
-      where: { user: { id: userId } },
-    });
-
-    if (!wallet) {
-      const user = await this.userRepo.findOne({ where: { id: userId } });
-      if (user) {
-        wallet = this.walletRepo.create({ user, balance: 0 });
-        await this.walletRepo.save(wallet);
-      }
-    }
-
-    return wallet!;
+    const user = await this.userRepo.findOneOrFail({ where: { id: userId } });
+    return this.findOrCreateWalletForUser(user);
   }
 
   @Transactional()
@@ -127,40 +127,39 @@ export class WalletsService {
   ) {
     const superAdmin = await this.userRepo.findOneOrFail({
       where: { email: process.env.SUPER_ADMIN_EMAIL },
-      relations: ['wallet'],
     });
 
     for (const { orderItem, quantity } of itemsToRefund) {
       const remainingQty = orderItem.quantity - orderItem.refundedQuantity;
 
       if (quantity > remainingQty) {
-        throw new AppHttpException(
-          ErrorCodeEnum.BAD_REQUEST_EXCEPTION,
-        );
+        throw new AppHttpException(ErrorCodeEnum.BAD_REQUEST_EXCEPTION);
       }
 
-      const vendorUser = await this.userRepo.findOne({
-        where: { vendorProfile: { id: orderItem.vendorId } },
-        relations: ['wallet', 'vendorProfile'],
+      const vendor = await this.vendorRepo.findOneOrFail({
+        where: { id: orderItem.vendorId },
+        relations: ['user'],
       });
 
-      if (!vendorUser || !vendorUser.vendorProfile || !vendorUser.wallet) {
-        throw new AppHttpException(
-          ErrorCodeEnum.VENDOR_NOT_FOUND,
-        );
+      const vendorUser = vendor.user;
+
+      if (!vendorUser) {
+        throw new AppHttpException(ErrorCodeEnum.VENDOR_NOT_FOUND);
       }
+
+      const vendorWallet = await this.findOrCreateWalletForUser(vendorUser);
 
       const itemRefundAmount = orderItem.priceAtPurchase * quantity;
 
-      const rate = Number(vendorUser.vendorProfile.commissionRate) / 100;
+      const rate = Number(vendor.commissionRate) / 100;
       const adminShare = Math.floor(itemRefundAmount * rate);
       const vendorShare = itemRefundAmount - adminShare;
 
-      vendorUser.wallet.balance -= vendorShare;
-      await this.walletRepo.save(vendorUser.wallet);
+      vendorWallet.balance -= vendorShare;
+      await this.walletRepo.save(vendorWallet);
 
       const vendorTx = this.txRepo.create({
-        wallet: vendorUser.wallet,
+        wallet: vendorWallet,
         order: order,
         amount: -vendorShare,
         type: TransactionType.REFUND,
@@ -168,12 +167,13 @@ export class WalletsService {
       });
       await this.txRepo.save(vendorTx);
 
-      if (superAdmin?.wallet) {
-        superAdmin.wallet.balance -= adminShare;
-        await this.walletRepo.save(superAdmin.wallet);
+      if (superAdmin) {
+        const adminWallet = await this.findOrCreateWalletForUser(superAdmin);
+        adminWallet.balance -= adminShare;
+        await this.walletRepo.save(adminWallet);
 
         const adminTx = this.txRepo.create({
-          wallet: superAdmin.wallet,
+          wallet: adminWallet,
           order: order,
           amount: -adminShare,
           type: TransactionType.REFUND,
@@ -201,7 +201,7 @@ export class WalletsService {
     const payoutAmountCents = input.amount * 100;
 
     if (wallet.balance < payoutAmountCents) {
-      throw new AppHttpException(ErrorCodeEnum.BAD_REQUEST_EXCEPTION); 
+      throw new AppHttpException(ErrorCodeEnum.BAD_REQUEST_EXCEPTION);
     }
     wallet.balance -= payoutAmountCents;
     await this.walletRepo.save(wallet);

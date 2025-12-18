@@ -18,7 +18,7 @@ import { Review } from '../../reviews/entities/review.entity';
 import { VendorProductsInput } from '../dtos/inputs/vendor-products.input';
 import { VendorOrdersInput } from '../dtos/inputs/vendor-orders.input';
 import { VendorReviewsInput } from '../dtos/inputs/vendor-reviews.input';
-import { FindOptionsRelations, FindOptionsWhere, Like } from 'typeorm';
+import {  FindOptionsWhere, Like } from 'typeorm';
 import { OrderItem } from '../../orders/entities/order-item.entity';
 import { OrderStatus } from '../../orders/enum/order-status.enum';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
@@ -70,7 +70,13 @@ export class VendorService {
       status: VendorStatus.PENDING,
     });
 
-    return this.vendorRepo.save(newVendor);
+    const savedVendor = await this.vendorRepo.save(newVendor);
+
+    user.vendorId = savedVendor.id;
+    user.vendorProfile = savedVendor;
+    await this.userRepo.save(user);
+
+    return savedVendor;
   }
 
   async updateVendorStatus(

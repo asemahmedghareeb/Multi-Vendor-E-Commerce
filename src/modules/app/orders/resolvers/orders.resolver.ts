@@ -31,7 +31,7 @@ export class OrdersResolver {
     private readonly userLoader: UserDataloader,
     private readonly paymentLoader: PaymentDataloader,
   ) {}
-
+  
   @Query(() => OrdersPaginated)
   @Auth({
     roles: [UserRoleEnum.ADMIN],
@@ -47,10 +47,10 @@ export class OrdersResolver {
     pagination: PaginatorInput,
   ) {
     return this.ordersService.findAllOrders(pagination);
-  }
-
+  } 
+  
   @Auth()
-  @Mutation(() => Order)
+  @Mutation(() => Order, { nullable: true })
   @Transactional()
   async createOrder(
     @Args('input') input: CreateOrderInput,

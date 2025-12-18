@@ -62,34 +62,62 @@ export class StripeStrategy implements PaymentStrategy {
     let externalId: string;
 
     switch (event.type) {
+      case 'payment_intent.created': {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        status = PaymentStatusEnum.INCOMPLETE;
+        externalId = paymentIntent.id;
+        break;
+      }
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         status = PaymentStatusEnum.SUCCEEDED;
         externalId = paymentIntent.id;
         break;
       }
-
+      case 'payment_intent.processing': {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        status = PaymentStatusEnum.INCOMPLETE;
+        externalId = paymentIntent.id;
+        break;
+      }
+      case 'payment_intent.canceled': {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        status = PaymentStatusEnum.FAILED;
+        externalId = paymentIntent.id;
+        break;
+      }
       case 'payment_intent.payment_failed': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         status = PaymentStatusEnum.FAILED;
         externalId = paymentIntent.id;
         break;
       }
-
+      case 'charge.succeeded': {
+        const charge = event.data.object as Stripe.Charge;
+        externalId = charge.payment_intent as string;
+        status = PaymentStatusEnum.SUCCEEDED;
+        break;
+      }
       case 'charge.refunded': {
         const charge = event.data.object as Stripe.Charge;
         externalId = charge.payment_intent as string;
         status = PaymentStatusEnum.REFUNDED;
         break;
       }
-
+      case 'charge.updated': {
+        Logger.log(`Skipping charge.updated event: ${event.id}`);
+        return;
+      }
       default: {
-        Logger.error(`Unhandled event type: ${event.type}`);
+        Logger.error(`Stripe Webhook: Unhandled event type: ${event.type}`);
         Logger.error(event.data.object);
         return;
       }
     }
 
+    Logger.log(
+      `Stripe Webhook: Processed event type: ${event.type}, Status: ${status}, ExternalId: ${externalId}`,
+    );
     return {
       status,
       externalId,
@@ -99,7 +127,7 @@ export class StripeStrategy implements PaymentStrategy {
   async refund(externalId: string, amount?: number): Promise<any> {
     return await this.stripeClient.refunds.create({
       payment_intent: externalId,
+      ...(amount && { amount }),
     });
-
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectAppRepository } from 'src/common/decorators/inject-app-repository.decorator';
 import { Payment } from '../entities/payment.entity';
 import { AppRepository } from '../../app-database/repositories/app.repository';
@@ -51,7 +51,7 @@ export class PaymentService {
       metadata,
     );
 
-    paymentIntent.clientSecret;
+    console.log(paymentIntent.clientSecret);
 
     const payment = await this.paymentRepository.createOne({
       paymentGateway,
@@ -76,9 +76,7 @@ export class PaymentService {
     const paymentStrategyClass = paymentStrategies[paymentGateway];
     const paymentStrategy =
       this.moduleRef.get<PaymentStrategy>(paymentStrategyClass);
-
     const paymentInfo = await paymentStrategy.handlePaymentWebhook(req);
-
     if (!paymentInfo)
       throw new AppHttpException(ErrorCodeEnum.SERVER_SIDE_ERROR);
 
@@ -102,11 +100,16 @@ export class PaymentService {
     }
 
     if (isNewSuccess && payment.order) {
-      await this.walletsService.processOrderRevenue(payment.order);
+      try {
+        Logger.log('Processing order revenue...');
+        await this.walletsService.processOrderRevenue(payment.order);
+        Logger.log('Order revenue processed successfully.');
+      } catch (error) {
+        Logger.error('Error processing order revenue:', error);
+        throw error; // re-throw the error to be caught by the global exception handler
+      }
     }
   }
-
-
 
   //add the wallet logic here
   async RefundPaymentPartially(input: CreateRefundInput) {
@@ -130,7 +133,7 @@ export class PaymentService {
           id: itemInput.orderItemId,
           order: { id: payment.order.id },
         },
-        // relations: ['product', 'vendor'],
+        relations: ['product'],
       });
 
       if (itemInput.quantity > orderItem.quantity) {
@@ -182,10 +185,7 @@ export class PaymentService {
   async refundPayment(paymentId: string, reason?: string) {
     const payment = await this.paymentRepository.findOneOrFail({
       where: { id: paymentId },
-      relations: [
-        'order',
-        'order.items',
-      ],
+      relations: ['order', 'order.items', 'order.items.product'],
     });
 
     if (payment.amountRefunded >= payment.amount) {
@@ -210,7 +210,10 @@ export class PaymentService {
     const paymentStrategy =
       this.moduleRef.get<PaymentStrategy>(paymentStrategyClass);
 
-    const stripeRefund = await paymentStrategy.refund(payment.externalId);
+    const stripeRefund = await paymentStrategy.refund(
+      payment.externalId,
+      remainingAmountToRefund,
+    );
 
     const refund = this.refundRepository.create({
       payment,
