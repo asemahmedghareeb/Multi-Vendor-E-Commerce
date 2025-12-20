@@ -9,8 +9,8 @@ import { AnalyticsService } from '../services/analytics.service';
 export class AnalyticsResolver {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
-  @Query(() => [Product], { name: 'topSellingProducts' })
-  async getTopProducts(
+  @Query(() => [Product])
+  async topProducts(
     @Args('input', { nullable: true }) input?: GetAnalyticsInput,
   ) {
     return this.analyticsService.getTopSellingProducts(
@@ -18,8 +18,8 @@ export class AnalyticsResolver {
     );
   }
 
-  @Query(() => [Vendor], { name: 'topPopularVendors' })
-  async getTopVendors(
+  @Query(() => [Vendor])
+  async topVendors(
     @Args('input', { nullable: true }) input?: GetAnalyticsInput,
   ) {
     return this.analyticsService.getTopVendors(

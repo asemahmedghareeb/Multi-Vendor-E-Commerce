@@ -41,7 +41,7 @@ export class Product extends AppBaseEntity {
 
   @Field(() => [String], { nullable: true })
   @Column('text', { array: true, default: [] })
-  images: string[];
+  images: string[];  //todo product attachements
 
   @Field(() => Vendor)
   @ManyToOne(() => Vendor, (vendor) => vendor.products)
