@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
   Between,
-  DataSource,
   FindOptionsWhere,
   ILike,
   In,
@@ -37,38 +36,39 @@ export class ProductService {
     private readonly followRepo: AppRepository<Follow>,
     @InjectAppRepository(File)
     private readonly fileRepo: AppRepository<File>,
-
   ) {}
 
-  async assignImage(
-    user: User,
-    productId: string,
-    fileId: string,
-  ): Promise<Product> {
-      const product = await this.productRepo.findOneOrFail({
-        where: { id: productId },
-        relations: { vendor: true },
-      });
+  // async assignImage(
+  //   user: User,
+  //   productId: string,
+  //   fileId: string,
+  // ): Promise<Product> {
+  //     const product = await this.productRepo.findOneOrFail({
+  //       where: { id: productId },
+  //       relations: { vendor: true },
+  //     });
 
-      await this.checkOwnership(product, user);
+  //     await this.checkOwnership(product, user);
 
-      const file = await this.fileRepo.findOneOrFail({
-        where: { id: fileId },
-      });
+  //     const file = await this.fileRepo.findOneOrFail({
+  //       where: { id: fileId },
+  //     });
 
-      if (file.hasReference) {
-        throw new AppHttpException(ErrorCodeEnum.FILE_ALREADY_IN_USE);
-      }
+  //     if (file.hasReference) {
+  //       throw new AppHttpException(ErrorCodeEnum.FILE_ALREADY_IN_USE);
+  //     }
 
-      product.images = [...(product.images || []), file.id];
-      file.hasReference = true;
+  //     product.images = [...(product.images || []), file.id];
+  //     file.hasReference = true;
 
-      await this.productRepo.save(product);
-      await this.fileRepo.save(file);
+  //     await this.productRepo.save(product);
+  //     await this.fileRepo.save(file);
 
-      return product;
-    
-  }
+  //     return product;
+
+  // }
+
+
 
   async create(userId: string, input: CreateProductInput): Promise<Product> {
     const vendor = await this.vendorRepo.findOneOrFail(
@@ -95,13 +95,26 @@ export class ProductService {
       ErrorCodeEnum.PRODUCT_ALREADY_EXISTS,
     );
 
+    const { images: imageIds, ...productData } = input;
+
+    let imageFiles: File[] = [];
+    if (imageIds && imageIds.length > 0) {
+      imageFiles = await this.fileRepo.find({
+        where: { id: In(imageIds) },
+      });
+      if (imageFiles.length !== imageIds.length) {
+        throw new AppHttpException(ErrorCodeEnum.FILE_DOES_NOT_EXIST);
+      }
+    }
+
     const product = this.productRepo.create({
-      ...input,
+      ...productData,
       price: Math.round(input.price * 100),
       vendor: vendor,
       category: category,
       vendorId: vendor.id,
       categoryId: category.id,
+      images: imageFiles,
     });
 
     await this.productRepo.save(product);
@@ -183,7 +196,9 @@ export class ProductService {
     const product = this.productRepo.findOneOrFail(
       {
         where: { id },
+        relations: ['images'],
       },
+
       ErrorCodeEnum.PRODUCT_DOES_NOT_EXIST,
     );
 
@@ -215,7 +230,15 @@ export class ProductService {
     if (input.description) product.description = input.description;
     if (input.inventoryCount !== undefined)
       product.inventoryCount = input.inventoryCount;
-    if (input.images) product.images = input.images;
+    if (input.images) {
+      const imageFiles = await this.fileRepo.find({
+        where: { fileName: In(input.images) },
+      });
+      if (imageFiles.length !== input.images.length) {
+        throw new AppHttpException(ErrorCodeEnum.FILE_DOES_NOT_EXIST);
+      }
+      product.images = imageFiles;
+    }
 
     return this.productRepo.save(product);
   }
@@ -227,7 +250,7 @@ export class ProductService {
         vendor: true,
       },
     });
-    await this.checkOwnership(product,user );
+    await this.checkOwnership(product, user);
 
     await this.productRepo.remove(product);
     return true;

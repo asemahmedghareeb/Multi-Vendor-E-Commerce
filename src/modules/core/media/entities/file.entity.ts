@@ -1,9 +1,11 @@
-import { ObjectType, Field, ID } from '@nestjs/graphql';
-import { Entity, Column, Index } from 'typeorm';
+import { ObjectType, Field } from '@nestjs/graphql';
+import { Entity, Column, Index, ManyToOne, JoinColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { FileUseCaseEnum } from '../enums/file-use-case.enum';
 import { FileModelEnum } from '../enums/file-model.enum';
 import { AppBaseEntity } from '../../app-database/entities/app-base.entity';
+import { Product } from 'src/modules/app/product/entities/product.entity';
+
 
 @Entity('files')
 @ObjectType()
@@ -48,6 +50,13 @@ export class File extends AppBaseEntity {
   })
   @Field(() => Boolean)
   uploaded: boolean;
+
+
+  @Field(() => Product)
+  @ManyToOne(() => Product, (product) => product.images)
+  @JoinColumn({ name: 'productId' })
+  product: Product;
+
 
   // todo make a resolve field with this
   @ApiProperty({

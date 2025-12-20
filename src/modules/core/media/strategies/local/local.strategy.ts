@@ -24,6 +24,7 @@ const BASE_UPLOAD_DIR = path.resolve(
   '..',
   '..',
   '..',
+  '..',
   'storage',
 );
 

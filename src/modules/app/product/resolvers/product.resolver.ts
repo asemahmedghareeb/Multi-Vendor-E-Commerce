@@ -61,18 +61,20 @@ export class ProductsResolver {
     return { presignedUrl, fileId: file.id };
   }
 
-  @Auth({
-    roles: [UserRoleEnum.VENDOR],
-  })
-  @Mutation(() => Product)
-  @Transactional()
-  async assignProductImage(
-    @Args('productId', { type: () => ID }) productId: string,
-    @Args('fileId', { type: () => ID }) fileId: string,
-    @CurrentUser() user: User,
-  ) {
-    return this.productService.assignImage(user, productId, fileId);
-  }
+  // @Auth({
+  //   roles: [UserRoleEnum.VENDOR],
+  // })
+  // @Mutation(() => Product)
+  // @Transactional()
+  // async assignProductImage(
+  //   @Args('productId', { type: () => ID }) productId: string,
+  //   @Args('fileId', { type: () => ID }) fileId: string,
+  //   @CurrentUser() user: User,
+  // ) {
+  //   return this.productService.assignImage(user, productId, fileId);
+  // }
+
+
 
   @Auth({
     roles: [UserRoleEnum.ADMIN, UserRoleEnum.VENDOR],
@@ -152,27 +154,27 @@ export class ProductsResolver {
     return this.productService.remove(user, id);
   }
 
-  @ResolveField(() => [String], { nullable: 'itemsAndList' })
-  async images(@Parent() product: Product) {
-    if (!product.images?.length) {
-      return [];
-    }
+  // @ResolveField(() => [String], { nullable: 'itemsAndList' })
+  // async images(@Parent() product: Product) {
+  //   if (!product.images?.length) {
+  //     return [];
+  //   }
 
-    // This is not the most optimal solution, as it can lead to N+1 problems.
-    // A better approach would be to use a DataLoader to batch fetch files.
-    // However, for simplicity, we are fetching them one by one here.
-    const files = await this.fileRepository.findByIds(product.images);
+  //   // This is not the most optimal solution, as it can lead to N+1 problems.
+  //   // A better approach would be to use a DataLoader to batch fetch files.
+  //   // However, for simplicity, we are fetching them one by one here.
+  //   const files = await this.fileRepository.findByIds(product.images);
 
-    if (!files.length) return [];
+  //   if (!files.length) return [];
 
-    const urls = await Promise.all(
-      files.map((file) =>
-        this.presignedUrlService.getDownloadPresignedUrl(file),
-      ),
-    );
+  //   const urls = await Promise.all(
+  //     files.map((file) =>
+  //       this.presignedUrlService.getDownloadPresignedUrl(file),
+  //     ),
+  //   );
 
-    return urls;
-  }
+  //   return urls;
+  // }
 
   @ResolveField(() => Vendor)
   async vendor(@Parent() product: Product) {

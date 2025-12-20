@@ -40,9 +40,9 @@ export class CreateProductInput {
   @IsString({ message: ValidationErrorMessageEnum.IS_STRING })
   categoryId: string;
 
-  @Field(() => [String], { nullable: true })
   @IsOptional()
-  @IsArray({ message: ValidationErrorMessageEnum.IS_ARRAY })
-  @IsString({ each: true ,message: ValidationErrorMessageEnum.IS_STRING })
+  @IsArray()
+  @IsString({ each: true, message: ValidationErrorMessageEnum.IS_STRING })
+  @Field(() => [String], { nullable: true })
   images?: string[];
 }

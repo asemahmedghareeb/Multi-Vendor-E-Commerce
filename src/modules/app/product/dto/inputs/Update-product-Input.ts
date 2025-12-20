@@ -10,4 +10,7 @@ export class UpdateProductInput extends PartialType(CreateProductInput) {
   @IsUUID('4', { message: ValidationErrorMessageEnum.IS_UUID })
   @IsNotEmpty({ message: ValidationErrorMessageEnum.NOT_EMPTY })
   id: string;
+
+  @Field(() => [String], { nullable: true })
+  images?: string[];
 }

@@ -15,7 +15,8 @@ import { validationPipeExceptionFactory } from 'src/common/utilities/validation-
 import { AppHttpException } from 'src/common/exceptions/app-http.exception';
 import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
 import { StreamFileInput } from '../dtos/inputs/stream-file.input';
-import { UploaderS3Strategy } from '../strategies/s3/s3.strategy';
+import { UploaderLocalStrategy } from '../strategies/local/local.strategy';
+// import { UploaderS3Strategy } from '../strategies/s3/s3.strategy';
 import { MarkFileAsUploadedInput } from '../dtos/inputs/mark-file-as-uploaded.input';
 
 @Injectable()
@@ -23,7 +24,8 @@ export class MediaService {
   constructor(
     @InjectAppRepository(File)
     private readonly fileRepository: AppRepository<File>,
-    @Inject(UploaderS3Strategy)
+    // @Inject(UploaderS3Strategy)
+    @Inject(UploaderLocalStrategy)
     private readonly uploaderStrategy: UploaderStrategy,
     private readonly uploaderValidationService: UploaderValidationService,
   ) {}

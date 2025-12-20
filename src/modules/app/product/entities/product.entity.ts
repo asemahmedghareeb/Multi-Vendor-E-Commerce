@@ -4,13 +4,14 @@ import {
   ManyToOne,
   JoinColumn,
   Index,
-  RelationId,
+  OneToMany,
 } from 'typeorm';
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { Vendor } from '../../vendors/entities/vendor.entity';
 import { Category } from '../../categories/entities/category.entity';
 import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
 import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
+import { File } from 'src/modules/core/media/entities/file.entity';
 
 @ObjectType()
 @Entity('products')
@@ -39,9 +40,11 @@ export class Product extends AppBaseEntity {
   @Column({ type: 'int', default: 0 })
   inventoryCount: number;
 
-  @Field(() => [String], { nullable: true })
-  @Column('text', { array: true, default: [] })
-  images: string[];  //todo product attachements
+  @Field(() => [File], { nullable: true , defaultValue: []})
+  @OneToMany(() => File, (file) => file.product, {
+    cascade: true,
+  })
+  images?: File[];
 
   @Field(() => Vendor)
   @ManyToOne(() => Vendor, (vendor) => vendor.products)
