@@ -3,7 +3,6 @@ import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { DeviceEnum } from 'src/common/enums/device.enum';
 import { LangEnum } from 'src/common/enums/lang.enum';
-import { AppConfig } from 'src/config/app.config';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { TimestampScalar } from 'src/common/scalars/timestamp.scalar';
 

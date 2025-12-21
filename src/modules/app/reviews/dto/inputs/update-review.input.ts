@@ -1,13 +1,20 @@
-import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
-import { IsUUID, IsNotEmpty } from 'class-validator';
-import { CreateReviewInput } from './create-review.input';
-
+import { InputType, Field, Int } from '@nestjs/graphql';
+import { IsString, IsNotEmpty, Min, Max, IsUUID } from 'class-validator';
 
 @InputType()
-export class UpdateReviewInput extends PartialType(CreateReviewInput) {
+export class UpdateReviewInput {
   @Field()
   @IsUUID()
   @IsNotEmpty()
   id: string;
 
+  @Field(() => Int, { nullable: true })
+  @Min(1)
+  @Max(5)
+  rating?: number;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsNotEmpty()
+  comment?: string;
 }

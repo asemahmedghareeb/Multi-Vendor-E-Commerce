@@ -4,6 +4,8 @@ import { AppRepository } from 'src/modules/core/app-database/repositories/app.re
 import { Wallet } from '../entities/wallet.entity';
 import { User } from '../../auth-base/user/entities/user.entity';
 import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
+import { FindOptionsRelations } from 'typeorm';
+
 
 export class WalletTransactionService {
   constructor(
@@ -13,17 +15,18 @@ export class WalletTransactionService {
     private readonly walletRepository: AppRepository<Wallet>,
   ) {}
 
-  async walletTransactions(user: User, input: PaginatorInput){
+  async walletTransactions(user: User, input: PaginatorInput) {
     const { page, limit } = input;
     const wallet = await this.walletRepository.findOneOrFail({
       where: { user },
     });
-    
+
     return await this.walletTransactionRepository.findPaginated(
       { wallet: { id: wallet.id } },
       { createdAt: 'DESC' },
       page,
       limit,
+      ['wallet', 'order'] as FindOptionsRelations<WalletTransaction>,
     );
   }
 }

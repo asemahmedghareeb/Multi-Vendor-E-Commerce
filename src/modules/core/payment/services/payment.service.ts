@@ -26,6 +26,8 @@ export class PaymentService {
     private readonly paymentRepository: AppRepository<Payment>,
     @InjectAppRepository(OrderItem)
     private readonly orderItemRepository: AppRepository<OrderItem>,
+    @InjectAppRepository(Order)
+    private readonly orderRepository: AppRepository<Order>,
     @InjectAppRepository(Refund)
     private readonly refundRepository: AppRepository<Refund>,
     private readonly walletsService: WalletsService,
@@ -106,7 +108,7 @@ export class PaymentService {
         Logger.log('Order revenue processed successfully.');
       } catch (error) {
         Logger.error('Error processing order revenue:', error);
-        throw error; // re-throw the error to be caught by the global exception handler
+        throw error;
       }
     }
   }

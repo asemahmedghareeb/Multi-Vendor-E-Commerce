@@ -1,6 +1,4 @@
-import {
-  Injectable,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Review } from '../entities/review.entity';
 import { Order } from '../../orders/entities/order.entity';
 import { Vendor } from '../../vendors/entities/vendor.entity';
@@ -10,6 +8,7 @@ import { CreateReviewInput } from '../dto/inputs/create-review.input';
 import { UpdateReviewInput } from '../dto/inputs/update-review.input';
 import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
 import { AppHttpException } from 'src/common/exceptions/app-http.exception';
+import { OrderStatus } from '../../orders/enum/order-status.enum';
 
 @Injectable()
 export class ReviewsService {
@@ -36,8 +35,6 @@ export class ReviewsService {
     });
   }
   async create(userId: string, input: CreateReviewInput): Promise<Review> {
-
-
     this.reviewRepo.findOneAndFail({
       where: {
         user: { id: userId },
@@ -51,12 +48,17 @@ export class ReviewsService {
       relations: ['items', 'user'],
     });
 
+    // if (order.user.id !== userId)
+    //   throw new AppHttpException(ErrorCodeEnum.FORBIDDEN);
 
-    if (order.user.id !== userId)
-      throw new AppHttpException(ErrorCodeEnum.FORBIDDEN);
+
+    if (order.user.id !== userId && order.status !== OrderStatus.DELIVERED)
+      throw new AppHttpException(ErrorCodeEnum.FORBIDDEN); 
 
     const hasBoughtFromVendor = order.items.some(
-      (item) => item.vendorId === input.vendorId,
+      (item) =>
+        item.vendorId === input.vendorId &&
+        item.status === OrderStatus.DELIVERED,
     );
 
     if (!hasBoughtFromVendor) {
@@ -82,7 +84,6 @@ export class ReviewsService {
     const review = await this.reviewRepo.findOneOrFail({
       where: { id: input.id },
     });
-
 
     if (review.userId !== userId) {
       throw new AppHttpException(ErrorCodeEnum.FORBIDDEN);

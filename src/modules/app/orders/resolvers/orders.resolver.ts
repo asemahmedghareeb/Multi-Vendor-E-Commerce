@@ -22,6 +22,7 @@ import { OrderItemsLoader } from '../dataloaders/order-items.dataloader';
 import { UserDataloader } from '../../auth-base/session/dataloaders/user.dataloader';
 import { Transactional } from 'typeorm-transactional';
 import { PaymentDataloader } from '../dataloaders/payment.dataloader';
+import { UpdateOrderStatusInput } from '../dto/inputs/update-order-status.input';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -57,6 +58,22 @@ export class OrdersResolver {
     @CurrentUser() user: User,
   ) {
     return this.ordersService.createOrder(user, input);
+  }
+
+  @Auth({
+    roles: [UserRoleEnum.ADMIN, UserRoleEnum.VENDOR],
+    permissions: [
+      {
+        action: DefaultPermissionActionsEnum.UPDATE,
+        target: Order.permissionsTarget,
+      },
+    ],
+  })
+  @Mutation(() => Order)
+  async updateOrderStatus(
+    @Args('input') input: UpdateOrderStatusInput,
+  ): Promise<Order> {
+    return this.ordersService.updateOrderStatus(input);
   }
 
   //for clients

@@ -16,6 +16,7 @@ import { PaymentService } from 'src/modules/core/payment/services/payment.servic
 import { AppConfig } from 'src/config/app.config';
 import { CurrenciesEnum } from 'src/common/enums/currency.enum';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
+import { UpdateOrderStatusInput } from '../dto/inputs/update-order-status.input';
 @Injectable()
 export class OrdersService {
   constructor(
@@ -163,5 +164,26 @@ export class OrdersService {
     }
 
     return order;
+  }
+
+  async updateOrderStatus(input: UpdateOrderStatusInput): Promise<Order> {
+    const order = await this.orderRepo.findOneOrFail({
+      where: { id: input.orderId },
+      relations: ['items'],
+    });
+
+    order.status = input.status;
+
+    const trackingRecords = order.items.map((item) => {
+      return this.orderTrackingRepo.create({
+        orderItem: item,
+        remarks: `Order status updated to ${input.status}`,
+        status: input.status,
+      });
+    });
+
+    await this.orderTrackingRepo.save(trackingRecords);
+
+    return this.orderRepo.save(order);
   }
 }

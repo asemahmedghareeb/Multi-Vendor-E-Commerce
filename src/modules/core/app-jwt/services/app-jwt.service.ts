@@ -2,8 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AppJwtToken } from 'src/common/types/app-jwt-token.type';
 import { TokenType } from '../enums/token-type.enum';
-import { AppHttpException } from 'src/common/exceptions/app-http.exception';
-import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
 import { TokePayload } from '../types/token-payload.type';
 
 @Injectable()
