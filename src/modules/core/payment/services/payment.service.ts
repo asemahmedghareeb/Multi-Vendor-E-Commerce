@@ -53,8 +53,6 @@ export class PaymentService {
       metadata,
     );
 
-    console.log(paymentIntent.clientSecret);
-
     const payment = await this.paymentRepository.createOne({
       paymentGateway,
       externalId: paymentIntent.id,

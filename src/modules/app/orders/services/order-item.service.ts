@@ -40,6 +40,7 @@ export class OrderItemService {
     );
   }
 
+  //TODO: get order items query and make it paginated (because the order may have many items)  
   async updateOrderItemStatus(
     user: User,
     itemId: string,

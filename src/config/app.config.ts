@@ -14,10 +14,12 @@ export const AppConfig: AppConfigType = {
   allowNotificationPusher: true,
   appGeneralCurrency: CurrenciesEnum.USD,
   monitorUserActivity: false,
+  MAX_CART_ITEMS: 50,
   throttlers: [
     {
       ttl: 60000,
       limit: 100,
     },
   ],
+  
 };

@@ -92,12 +92,6 @@ export class StripeStrategy implements PaymentStrategy {
         externalId = paymentIntent.id;
         break;
       }
-      case 'charge.succeeded': {
-        const charge = event.data.object as Stripe.Charge;
-        externalId = charge.payment_intent as string;
-        status = PaymentStatusEnum.SUCCEEDED;
-        break;
-      }
       case 'charge.refunded': {
         const charge = event.data.object as Stripe.Charge;
         externalId = charge.payment_intent as string;

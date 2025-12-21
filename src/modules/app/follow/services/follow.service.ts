@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Follow } from './entities/follow.entity';
-import { User } from '../auth-base/user/entities/user.entity';
-import { Vendor } from '../vendors/entities/vendor.entity';
+import { Follow } from '../entities/follow.entity';
+import { User } from '../../auth-base/user/entities/user.entity';
+import { Vendor } from '../../vendors/entities/vendor.entity';
 import { AppHttpException } from 'src/common/exceptions/app-http.exception';
 import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
 import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';

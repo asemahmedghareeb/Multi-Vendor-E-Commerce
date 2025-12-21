@@ -150,6 +150,10 @@ export class ProductService {
       { createdAt: 'DESC' },
       page,
       limit,
+      // {
+      //   vendor: true,
+      //   category: true,
+      // }
     );
   }
 
@@ -189,6 +193,10 @@ export class ProductService {
       { createdAt: 'DESC' },
       page,
       limit,
+      // {
+      //   vendor: true,
+      //   category: true,
+      // }
     );
   }
 

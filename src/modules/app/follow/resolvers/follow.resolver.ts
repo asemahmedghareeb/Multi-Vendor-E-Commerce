@@ -3,23 +3,23 @@ import {
   Mutation,
   Query,
   Args,
-  ResolveField,
-  Parent,
+  // ResolveField,
+  // Parent,
 } from '@nestjs/graphql';
-import { Follow } from './entities/follow.entity';
-import { FollowsService } from './follow.service';
+import { Follow } from '../entities/follow.entity';
+import { FollowsService } from '../services/follow.service';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { User } from '../auth-base/user/entities/user.entity';
+import { User } from '../../auth-base/user/entities/user.entity';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
-import { UserDataloader } from '../auth-base/session/dataloaders/user.dataloader';
+// import { UserDataloader } from '../auth-base/session/dataloaders/user.dataloader';
 
 @Resolver(() => Follow)
 export class FollowsResolver {
   constructor(
     private readonly followsService: FollowsService,
-    private readonly userDataloader: UserDataloader,
+    // private readonly userDataloader: UserDataloader,
   ) {}
 
   @Auth()
@@ -51,8 +51,8 @@ export class FollowsResolver {
     return this.followsService.getMyFollowers(user, pagination);
   }
 
-    // @ResolveField(() => User)
-    // async follower(@Parent() follow: Follow) {
-    //   return this.userDataloader.getDataloader().load(follow.followerId);
-    // }
+  // @ResolveField(() => User)
+  // async follower(@Parent() follow: Follow) {
+  //   return this.userDataloader.getDataloader().load(follow.followerId);
+  // }
 }

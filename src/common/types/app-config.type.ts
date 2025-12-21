@@ -13,5 +13,6 @@ export type AppConfigType = {
   allowNotificationPusher: boolean;
   appGeneralCurrency: CurrenciesEnum;
   monitorUserActivity: boolean;
+  MAX_CART_ITEMS: number;
   throttlers: ThrottlerOptions[];
 };

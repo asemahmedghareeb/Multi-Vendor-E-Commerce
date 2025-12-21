@@ -47,10 +47,7 @@ export class OrdersService {
     );
   }
 
-  async createOrder(
-    user: User,
-    input: CreateOrderInput,
-  ): Promise<Order> {
+  async createOrder(user: User, input: CreateOrderInput): Promise<Order> {
     const cart = await this.cartRepo.findOneOrFail({
       where: { user: { id: user.id } },
       relations: ['items', 'user', 'items.product', 'items.product.vendor'],
@@ -132,12 +129,10 @@ export class OrdersService {
       savedOrder,
     );
 
-
     savedOrder.payment = payment;
 
-        await this.orderTrackingRepo.save(trackingRecords);
-        await this.cartRepo.delete({ id: cart.id });
-
+    await this.orderTrackingRepo.save(trackingRecords);
+    await this.cartRepo.delete({ id: cart.id });
 
     return savedOrder;
   }

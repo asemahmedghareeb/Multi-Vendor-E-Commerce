@@ -14,6 +14,7 @@ import { FindOptionsRelations } from 'typeorm';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { instanceToPlain } from 'class-transformer';
+import { AppConfig } from 'src/config/app.config';
 
 @Injectable()
 export class CartService {
@@ -36,7 +37,7 @@ export class CartService {
     const cachedData = await this.cacheManager.get<string>(cacheKey);
     if (cachedData) {
       console.log('cart from cache');
-      return cachedData as unknown as Cart; 
+      return cachedData as unknown as Cart;
     }
 
     // 2. Fetch from DB if miss
@@ -120,6 +121,9 @@ export class CartService {
       cartItem.quantity = newQuantity;
       await this.cartItemRepo.save(cartItem);
     } else {
+      if (cart.items.length >= AppConfig.MAX_CART_ITEMS) {
+        throw new AppHttpException(ErrorCodeEnum.BAD_REQUEST_EXCEPTION);
+      }
       if (product.inventoryCount < input.quantity) {
         throw new AppHttpException(ErrorCodeEnum.INSUFFICIENT_INVENTORY, {
           count: product.inventoryCount,
