@@ -20,7 +20,10 @@ export class CartResolver {
 
   @Auth()
   @Query(() => CartItemPaginated)
-  async myCart(@CurrentUser() user: User, pagination: PaginatorInput) {
+  async myCart(
+    @CurrentUser() user: User,
+    @Args('pagination', { nullable: true }) pagination: PaginatorInput,
+  ) {
     return this.cartService.getCart(user, pagination);
   }
 

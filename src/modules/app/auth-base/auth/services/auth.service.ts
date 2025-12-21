@@ -490,7 +490,7 @@ export class AuthService {
         socialAccounts: true,
       },
     });
-
+ 
     if (!user) throw new AppHttpException(ErrorCodeEnum.USER_DOES_NOT_EXIST);
 
     const socialProviders = user.socialAccounts.map(

@@ -57,11 +57,12 @@ export class CartService {
     return cart;
   }
 
-  async getCart(user: User, pagination: PaginatorInput) {
-    const { page, limit } = pagination;
+  async getCart(user: User, pagination?: PaginatorInput) {
+    const { page = 1, limit = 15 } = pagination || {};
     let cart = await this.cartRepo.findOne({
       where: { user: { id: user.id } },
       order: { items: { createdAt: 'ASC' } },
+      relations: ['items'],
     });
     if (!cart) {
       cart = await this.createCart(user);

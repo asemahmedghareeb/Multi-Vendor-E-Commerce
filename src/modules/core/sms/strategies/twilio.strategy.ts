@@ -15,12 +15,12 @@ export class TwilioStrategy implements SmsStrategy {
 
   async sendSMS(to: string, body: string): Promise<any> {
     console.log('message sent to ' + to + ' : ' + body, 'twilio');
-
-    return;
-    await this.twilioClient.messages.create({
-      body,
-      from: this.configService.get<string>('TWILIO_SENDER_PHONE_ID'),
-      to,
-    });
+    console.log(
+      await this.twilioClient.messages.create({
+        body,
+        from: this.configService.get<string>('TWILIO_SENDER_PHONE_ID'),
+        to,
+      }),
+    );
   }
 }

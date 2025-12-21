@@ -5,7 +5,6 @@ import { Order } from '../entities/order.entity';
 import { OrderItem } from '../entities/order-item.entity';
 import { AppRepository } from 'src/modules/core/app-database/repositories/app.repository';
 import { Product } from '../../product/entities/product.entity';
-import { CartItem } from '../../cart/entities/cart-item.entity';
 import { User } from '../../auth-base/user/entities/user.entity';
 import { Cart } from '../../cart/entities/cart.entity';
 import { AppHttpException } from 'src/common/exceptions/app-http.exception';
@@ -26,8 +25,6 @@ export class OrdersService {
     private readonly orderItemRepo: AppRepository<OrderItem>,
     @InjectAppRepository(Product)
     private readonly productRepo: AppRepository<Product>,
-    @InjectAppRepository(CartItem)
-    private readonly cartItemRepo: AppRepository<CartItem>,
     @InjectAppRepository(User)
     private readonly userRepo: AppRepository<User>,
     @InjectAppRepository(Cart)

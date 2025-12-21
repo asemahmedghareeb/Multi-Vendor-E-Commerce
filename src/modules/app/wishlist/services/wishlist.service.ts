@@ -24,20 +24,22 @@ export class WishlistService {
   async getWishlist(user: User, pagination: PaginatorInput) {
     const { page, limit } = pagination;
     let wishlist = await this.wishlistRepo.findOne({
-      where: { user: { id: user.id } },
-      order: { items: { createdAt: 'ASC' } },
+      where: { userId: user.id },
     });
+
     if (!wishlist) {
       wishlist = await this.createWishlist(user);
-      return wishlist;
     }
-    return this.wishlistItemRepo.findPaginated(
-      { wishlist: { id: wishlist.id } },
+
+    const paginatedItems = await this.wishlistItemRepo.findPaginated(
+      { wishlistId: wishlist.id },
       { createdAt: 'DESC' },
       page,
       limit,
       ['product', 'product.vendor'] as FindOptionsRelations<WishlistItem>,
     );
+
+    return paginatedItems;
   }
 
   async createWishlist(user: User) {

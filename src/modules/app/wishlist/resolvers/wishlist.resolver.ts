@@ -6,14 +6,18 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { User } from '../../auth-base/user/entities/user.entity';
 import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
+import { PaginatedWishlist } from '../dto/responses/paginaated-wishlist';
 
 @Resolver(() => Wishlist)
 export class WishlistResolver {
   constructor(private readonly wishlistService: WishlistService) {}
 
-  @Query(() => Wishlist)
+  @Query(() => PaginatedWishlist)
   @Auth()
-  async myWishlist(@CurrentUser() user: User, pagination: PaginatorInput) {
+  async myWishlist(
+    @CurrentUser() user: User,
+    @Args('pagination', { nullable: true }) pagination: PaginatorInput,
+  ) {
     return this.wishlistService.getWishlist(user, pagination);
   }
 
