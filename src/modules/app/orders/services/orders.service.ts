@@ -17,6 +17,7 @@ import { AppConfig } from 'src/config/app.config';
 import { CurrenciesEnum } from 'src/common/enums/currency.enum';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
 import { UpdateOrderStatusInput } from '../dto/inputs/update-order-status.input';
+import { FindOptionsRelations } from 'typeorm';
 @Injectable()
 export class OrdersService {
   constructor(
@@ -44,6 +45,14 @@ export class OrdersService {
       { createdAt: 'DESC' },
       page,
       limit,
+      {
+        items: {
+          product: true,
+          vendor: true,
+        },
+        user: true,
+
+      },
     );
   }
 
@@ -152,6 +161,7 @@ export class OrdersService {
   async getOrder(orderId: string, user: User): Promise<Order> {
     const order = await this.orderRepo.findOneOrFail({
       where: { id: orderId },
+      relations: ['items', 'user', 'items.product', 'items.product.vendor'],
     });
 
     if (order.userId !== user.id && user.role !== UserRoleEnum.ADMIN) {

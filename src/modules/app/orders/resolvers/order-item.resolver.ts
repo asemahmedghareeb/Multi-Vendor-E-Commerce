@@ -69,17 +69,17 @@ export class OrderItemResolver {
     return this.orderItemService.updateOrderItemStatus(user, itemId, status);
   }
 
-  @ResolveField(() => Product)
-  async product(@Parent() orderItem: OrderItem) {
-    if (orderItem.product) return orderItem.product;
-    return this.productLoader.getDataloader().load(orderItem.productId);
-  }
+  // @ResolveField(() => Product)
+  // async product(@Parent() orderItem: OrderItem) {
+  //   if (orderItem.product) return orderItem.product;
+  //   return this.productLoader.getDataloader().load(orderItem.productId);
+  // }
 
-  @ResolveField(() => Vendor)
-  async vendor(@Parent() orderItem: OrderItem) {
-    if (orderItem.vendor) return orderItem.vendor;
-    return this.vendorLoader.getDataloader().load(orderItem.vendorId);
-  }
+  // @ResolveField(() => Vendor)
+  // async vendor(@Parent() orderItem: OrderItem) {
+  //   if (orderItem.vendor) return orderItem.vendor;
+  //   return this.vendorLoader.getDataloader().load(orderItem.vendorId);
+  // }
 
   @ResolveField(() => Order)
   async order(@Parent() orderItem: OrderItem) {

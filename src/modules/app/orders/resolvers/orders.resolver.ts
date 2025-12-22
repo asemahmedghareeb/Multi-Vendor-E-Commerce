@@ -100,18 +100,18 @@ export class OrdersResolver {
     return this.ordersService.getOrder(id, user);
   }
 
-  @ResolveField(() => [OrderItem])
-  async items(@Parent() order: Order) {
-    if (order.items) return order.items;
+  // @ResolveField(() => [OrderItem])
+  // async items(@Parent() order: Order) {
+  //   if (order.items) return order.items;
 
-    return this.orderItemsLoader.getDataloader().load(order.id);
-  }
+  //   return this.orderItemsLoader.getDataloader().load(order.id);
+  // }
   
-  @ResolveField(() => User)
-  async user(@Parent() order: Order) {
-    if (order.user) return order.user;
-    return this.userLoader.getDataloader().load(order.userId);
-  }
+  // @ResolveField(() => User)
+  // async user(@Parent() order: Order) {
+  //   if (order.user) return order.user;
+  //   return this.userLoader.getDataloader().load(order.userId);
+  // }
 
   @ResolveField(() => Payment, { nullable: true })
   async payment(@Parent() order: Order) {
