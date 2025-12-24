@@ -40,7 +40,7 @@ import { CartModule } from './modules/app/cart/cart.module';
 import { ProductModule } from './modules/app/product/product.module';
 import { UserModule } from './modules/app/auth-base/user/user.module';
 import { AuthModule } from './modules/app/auth-base/auth/auth.module';
-import { PaymentModule } from './modules/core/payment/payment.module';
+import { PaymentModule } from './modules/app/payment/payment.module';
 import { OrdersModule } from './modules/app/orders/orders.module';
 import { WalletModule } from './modules/app/wallet/wallet.module';
 import { ReviewsModule } from './modules/app/reviews/reviews.module';
@@ -111,7 +111,7 @@ import { AnalyticsModule } from './modules/app/analytics/analytics.module';
     ContentModule,
     NotificationModule,
     RegionModule,
-    AnalyticsModule
+    AnalyticsModule,
     // AutoModuleLoaderModule.register(), // todo remove if u want modules to be not auto loaded
   ],
   controllers: [AppController],

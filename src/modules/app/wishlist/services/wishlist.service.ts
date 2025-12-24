@@ -52,7 +52,7 @@ export class WishlistService {
 
   async addToWishlist(user: User, productId: string): Promise<Wishlist> {
     let wishlist = await this.wishlistRepo.findOne({
-      where: { user: { id: user.id } },
+      where: {userId: user.id},
       relations: ['items', 'user'],
     });
 
@@ -85,7 +85,7 @@ export class WishlistService {
     productId: string,
   ): Promise<Wishlist> {
     const wishlist = await this.wishlistRepo.findOne({
-      where: { user: { id: userId } },
+      where: { userId },
       relations: ['items', 'user'],
     });
 
@@ -94,7 +94,7 @@ export class WishlistService {
     }
 
     const item = await this.wishlistItemRepo.findOneOrFail({
-      where: { wishlist: { id: wishlist.id }, product: { id: productId } },
+      where: { wishlistId: wishlist.id, productId },
     });
 
     await this.wishlistItemRepo.remove(item);

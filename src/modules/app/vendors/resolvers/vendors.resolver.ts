@@ -68,7 +68,15 @@ export class VendorsResolver {
       },
     ],
   })
-  @Auth({ roles: [UserRoleEnum.ADMIN] })
+  @Auth({
+    roles: [UserRoleEnum.ADMIN],
+    permissions: [
+      {
+        action: VendorPermissionActionsEnum.READ,
+        target: Vendor.permissionsTarget,
+      },
+    ],
+  })
   @Query(() => [Vendor])
   async pendingVendors() {
     return this.vendorService.findPendingVendors();
@@ -97,7 +105,7 @@ export class VendorsResolver {
   @Query(() => PaginatedVendorOrders)
   async vendorOrders(
     @Args('vendorId', ParseUUIDPipe) vendorId: string,
-    @Args('pagination') pagination: VendorOrdersInput,
+    @Args('pagination', { nullable: true }) pagination: VendorOrdersInput,
   ) {
     return this.vendorService.vendorOrders(vendorId, pagination);
   }

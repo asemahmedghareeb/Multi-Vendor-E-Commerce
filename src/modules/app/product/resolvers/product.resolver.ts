@@ -18,7 +18,7 @@ import { Vendor } from '../../vendors/entities/vendor.entity';
 import { CategoryLoader } from '../dataloaders/category.dataloader';
 import { VendorDataloader } from '../dataloaders/vendor.dataloader';
 import { CreateProductInput } from '../dto/inputs/create-product.input';
-import { GetProductsFilterInput } from '../dto/inputs/product-filter.input';
+import { GetProductsFilterInput } from '../dto/inputs/pagination.input';
 import { UpdateProductInput } from '../dto/inputs/Update-product-Input';
 import { ProductPaginated } from '../dto/responses/paginated-products';
 import { Product } from '../entities/product.entity';
@@ -73,8 +73,6 @@ export class ProductsResolver {
   //   return this.productService.assignImage(user, productId, fileId);
   // }
 
-
-
   @Auth({
     roles: [UserRoleEnum.ADMIN, UserRoleEnum.VENDOR],
     permissions: [
@@ -103,10 +101,10 @@ export class ProductsResolver {
     return this.productService.getUserFeed(user, pagination);
   }
 
-  @Auth()
+  // @Auth()
   @Query(() => ProductPaginated)
   async products(
-    @Args('filter', { nullable: true }) filter: GetProductsFilterInput,
+    @Args('pagination', { nullable: true }) filter: GetProductsFilterInput,
   ) {
     return this.productService.findAll(filter);
   }

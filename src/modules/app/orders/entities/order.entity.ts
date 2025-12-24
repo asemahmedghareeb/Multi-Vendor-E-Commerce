@@ -1,18 +1,23 @@
 import { ObjectType, Field, Float } from '@nestjs/graphql';
-import { Entity, Column, ManyToOne, OneToMany, JoinColumn, OneToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+  OneToOne,
+} from 'typeorm';
 import { OrderItem } from './order-item.entity';
 import { OrderStatus } from '../enum/order-status.enum';
 import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
 import { User } from '../../auth-base/user/entities/user.entity';
 import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
-import { Payment } from 'src/modules/core/payment/entities/payment.entity';
-
+import { Payment } from 'src/modules/app/payment/entities/payment.entity';
 
 @ObjectType()
 @Entity('orders')
 @GeneratePermissions()
 export class Order extends AppBaseEntity {
-
   @Field(() => User)
   @ManyToOne(() => User, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'userId' })
@@ -22,18 +27,18 @@ export class Order extends AppBaseEntity {
   userId: string;
 
   @Field(() => Float)
-  @Column({ 
+  @Column({
     type: 'bigint',
     transformer: {
       to: (value: number) => value,
       from: (value: string) => parseInt(value, 10),
-    }
-  }) 
-  totalAmount: number; 
+    },
+  })
+  totalAmount: number;
 
   @Field(() => String)
-  @Column({ type: 'jsonb' }) 
-  shippingAddress: any; 
+  @Column({ type: 'jsonb' })
+  shippingAddress: any;
 
   @Field(() => OrderStatus)
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })

@@ -5,7 +5,7 @@ import { TestEntity } from './entities/test.entity';
 import { MailModule } from 'src/modules/core/mail/mail.module';
 import { SmsModule } from 'src/modules/core/sms/sms.module';
 import { NotificationPusherModule } from 'src/modules/core/notification-pusher/notification-pusher.module';
-import { PaymentModule } from 'src/modules/core/payment/payment.module';
+import { PaymentModule } from 'src/modules/app/payment/payment.module';
 import { File } from 'src/modules/core/media/entities/file.entity';
 
 @Module({

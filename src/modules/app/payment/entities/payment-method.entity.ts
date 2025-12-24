@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { AppBaseEntity } from '../../app-database/entities/app-base.entity';
+import { AppBaseEntity } from '../../../core/app-database/entities/app-base.entity';
 import { PaymentGatewaysEnum } from '../enums/payment-gateways.enum';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { CardDetailsType } from '../types/card-details.type';

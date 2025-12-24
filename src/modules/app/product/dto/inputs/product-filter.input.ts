@@ -1,9 +1,9 @@
-import { InputType, Field, Int, Float } from '@nestjs/graphql';
-import { IsOptional, IsString, IsInt, Min } from 'class-validator';
-import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
-import { ValidationErrorMessageEnum } from 'src/common/enums/validation-error-message.enum';
+import { Field, Float, InputType, Int } from "@nestjs/graphql";
+import { IsOptional, IsString, Min } from "class-validator";
+import { ValidationErrorMessageEnum } from "src/common/enums/validation-error-message.enum";
+
 @InputType()
-export class GetProductsFilterInput extends PaginatorInput {
+export class ProductFilterInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsString({ message: ValidationErrorMessageEnum.IS_STRING })

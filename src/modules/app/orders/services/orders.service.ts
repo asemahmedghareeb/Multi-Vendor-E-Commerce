@@ -12,12 +12,11 @@ import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
 import { CreateOrderInput } from '../dto/inputs/create-order.input';
 import { OrderStatus } from '../enum/order-status.enum';
 import { OrderTracking } from '../entities/order-tracking.entity';
-import { PaymentService } from 'src/modules/core/payment/services/payment.service';
+import { PaymentService } from 'src/modules/app/payment/services/payment.service';
 import { AppConfig } from 'src/config/app.config';
 import { CurrenciesEnum } from 'src/common/enums/currency.enum';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
 import { UpdateOrderStatusInput } from '../dto/inputs/update-order-status.input';
-import { FindOptionsRelations } from 'typeorm';
 @Injectable()
 export class OrdersService {
   constructor(
@@ -57,7 +56,7 @@ export class OrdersService {
 
   async createOrder(user: User, input: CreateOrderInput): Promise<Order> {
     const cart = await this.cartRepo.findOneOrFail({
-      where: { user: { id: user.id } },
+      where: { user_Id: user.id },
       relations: ['items', 'user', 'items.product', 'items.product.vendor'],
       order: { items: { createdAt: 'ASC' } },
     });

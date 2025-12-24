@@ -41,7 +41,9 @@ export class CategoriesService {
       { createdAt: 'DESC' },
       page,
       limit,
-      ['parent'] as FindOptionsRelations<Category>,
+     {
+      parent: true,
+     }
     );
   }
 

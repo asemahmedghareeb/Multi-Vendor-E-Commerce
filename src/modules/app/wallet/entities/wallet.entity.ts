@@ -21,6 +21,10 @@ export class Wallet extends AppBaseEntity {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
+  @Field(() => String)
+  @Column()
+  user_id: string;
+
 
   @OneToMany(
     () => WalletTransaction,

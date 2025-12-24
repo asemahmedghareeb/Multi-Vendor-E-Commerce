@@ -51,9 +51,8 @@ export class ReviewsService {
     // if (order.user.id !== userId)
     //   throw new AppHttpException(ErrorCodeEnum.FORBIDDEN);
 
-
     if (order.user.id !== userId && order.status !== OrderStatus.DELIVERED)
-      throw new AppHttpException(ErrorCodeEnum.FORBIDDEN); 
+      throw new AppHttpException(ErrorCodeEnum.FORBIDDEN);
 
     const hasBoughtFromVendor = order.items.some(
       (item) =>
@@ -66,9 +65,9 @@ export class ReviewsService {
     }
 
     const review = this.reviewRepo.create({
-      user: { id: userId },
-      vendor: { id: input.vendorId },
-      order: { id: input.orderId },
+      userId,
+      vendorId: input.vendorId,
+      orderId: input.orderId,
       rating: input.rating,
       comment: input.comment,
     });

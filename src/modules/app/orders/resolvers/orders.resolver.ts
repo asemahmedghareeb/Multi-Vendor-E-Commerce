@@ -10,7 +10,7 @@ import { Order } from '../entities/order.entity';
 import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
-import { Payment } from 'src/modules/core/payment/entities/payment.entity';
+import { Payment } from 'src/modules/app/payment/entities/payment.entity';
 import { OrdersPaginated } from '../dto/responses/paginated-orders';
 import { User } from '../../auth-base/user/entities/user.entity';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
@@ -32,7 +32,7 @@ export class OrdersResolver {
     private readonly userLoader: UserDataloader,
     private readonly paymentLoader: PaymentDataloader,
   ) {}
-  
+
   @Query(() => OrdersPaginated)
   @Auth({
     roles: [UserRoleEnum.ADMIN],
@@ -48,8 +48,8 @@ export class OrdersResolver {
     pagination: PaginatorInput,
   ) {
     return this.ordersService.findAllOrders(pagination);
-  } 
-  
+  }
+
   @Auth()
   @Mutation(() => Order, { nullable: true })
   @Transactional()
@@ -106,7 +106,7 @@ export class OrdersResolver {
 
   //   return this.orderItemsLoader.getDataloader().load(order.id);
   // }
-  
+
   // @ResolveField(() => User)
   // async user(@Parent() order: Order) {
   //   if (order.user) return order.user;

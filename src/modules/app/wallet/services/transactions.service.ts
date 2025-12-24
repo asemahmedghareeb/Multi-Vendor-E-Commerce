@@ -22,7 +22,7 @@ export class WalletTransactionService {
     });
 
     return await this.walletTransactionRepository.findPaginated(
-      { wallet: { id: wallet.id } },
+      { walletId: wallet.id },
       { createdAt: 'DESC' },
       page,
       limit,

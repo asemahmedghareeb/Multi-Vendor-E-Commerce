@@ -4,7 +4,7 @@ import { In } from 'typeorm';
 import * as Dataloader from 'dataloader';
 import { InjectAppRepository } from 'src/common/decorators/inject-app-repository.decorator';
 import { AppRepository } from 'src/modules/core/app-database/repositories/app.repository';
-import { Payment } from 'src/modules/core/payment/entities/payment.entity';
+import { Payment } from 'src/modules/app/payment/entities/payment.entity';
 
 @AppRequestScopedDataloader()
 export class PaymentDataloader implements AppDataloader<string, Payment> {

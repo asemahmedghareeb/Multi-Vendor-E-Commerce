@@ -3,7 +3,7 @@ import { PaymentService } from './services/payment.service';
 import { StripeStrategy } from './strategies/stripe.strategy';
 import { PaymentController } from './controllers/payment.controller';
 import { ConfigService } from '@nestjs/config';
-import { AppDatabaseModule } from '../app-database/app-database.module';
+import { AppDatabaseModule } from '../../core/app-database/app-database.module';
 import { Payment } from './entities/payment.entity';
 import { Order } from 'src/modules/app/orders/entities/order.entity';
 import { WalletModule } from 'src/modules/app/wallet/wallet.module';

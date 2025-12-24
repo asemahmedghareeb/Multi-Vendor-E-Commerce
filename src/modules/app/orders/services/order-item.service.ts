@@ -33,7 +33,7 @@ export class OrderItemService {
     const page = pagination.page;
     const limit = pagination.limit;
     return this.orderItemRepo.findPaginated(
-      { vendor: { id: vendor.id } },
+      { vendorId: vendor.id },
       { createdAt: 'DESC' },
       page,
       limit,

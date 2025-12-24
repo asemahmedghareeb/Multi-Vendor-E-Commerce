@@ -18,7 +18,7 @@ import { Review } from '../../reviews/entities/review.entity';
 import { VendorProductsInput } from '../dtos/inputs/vendor-products.input';
 import { VendorOrdersInput } from '../dtos/inputs/vendor-orders.input';
 import { VendorReviewsInput } from '../dtos/inputs/vendor-reviews.input';
-import {  FindOptionsWhere, Like } from 'typeorm';
+import { FindOptionsWhere, Like } from 'typeorm';
 import { OrderItem } from '../../orders/entities/order-item.entity';
 import { OrderStatus } from '../../orders/enum/order-status.enum';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
@@ -61,7 +61,7 @@ export class VendorService {
     const user = await this.userRepo.findOneOrFail({ where: { id: userId } });
 
     await this.vendorRepo.findOneAndFail({
-      where: { user: { id: userId } },
+      where: { userId },
     });
 
     const newVendor = this.vendorRepo.create({
@@ -84,7 +84,7 @@ export class VendorService {
     status: VendorStatus,
   ): Promise<Boolean> {
     const vendor = await this.vendorRepo.findOneOrFail({
-      where: { user: { id: userId } },
+      where: { userId },
       relations: { user: true },
     });
 
@@ -153,6 +153,7 @@ export class VendorService {
   }
 
   async findPendingVendors(): Promise<Vendor[]> {
+    //todo pagination
     return this.vendorRepo.find({
       where: { status: VendorStatus.PENDING },
       order: { createdAt: 'ASC' },
@@ -162,8 +163,17 @@ export class VendorService {
   async vendorProducts(vendorId: string, pagination: VendorProductsInput) {
     const { name, limit, page } = pagination;
     const where: FindOptionsWhere<Product> = {
-      vendor: { id: vendorId },
+      vendorId,
     };
+
+    console.log(
+      await this.productRepo.findPaginated(
+        where,
+        { createdAt: 'DESC' },
+        page,
+        limit,
+      ),
+    );
 
     if (name) {
       where.name = Like(`%${name}%`);
@@ -181,7 +191,7 @@ export class VendorService {
     const { page, limit, status } = pagination;
 
     const where: FindOptionsWhere<OrderItem> = {
-      vendor: { id: vendorId },
+      vendorId,
     };
 
     if (status) {
@@ -203,7 +213,7 @@ export class VendorService {
   async vendorReviews(vendorId: string, pagination: VendorReviewsInput) {
     const { page, limit, rating } = pagination;
     const where: FindOptionsWhere<Review> = {
-      vendor: { id: vendorId },
+      vendorId,
     };
 
     if (rating) {

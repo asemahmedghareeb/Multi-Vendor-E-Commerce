@@ -10,20 +10,15 @@ import { SessionModule } from '../auth-base/session/session.module';
 import { Review } from '../reviews/entities/review.entity';
 import { Product } from '../product/entities/product.entity';
 import { OrderItem } from '../orders/entities/order-item.entity';
+import { VendorsResolver } from './resolvers/vendors.resolver';
 
 @Module({
   imports: [
-    AppDatabaseModule.forFeature([
-      User,
-      Vendor,
-      Review,
-      Product,
-      OrderItem,
-    ]),
+    AppDatabaseModule.forFeature([User, Vendor, Review, Product, OrderItem]),
     MailModule,
     NotificationModule,
     SessionModule,
   ],
-  providers: [VendorService, UserDataloader],
+  providers: [VendorService, UserDataloader, VendorsResolver],
 })
 export class VendorsModule {}

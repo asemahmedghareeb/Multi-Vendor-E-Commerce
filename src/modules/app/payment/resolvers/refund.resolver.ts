@@ -19,7 +19,7 @@ export class RefundsResolver {
     return this.paymentsService.RefundPaymentPartially(input);
   }
 
-  @Auth({ roles: [UserRoleEnum.USER] })
+  @Auth({ roles: [UserRoleEnum.ADMIN] })
   @Mutation(() => Refund)
   @Transactional()
   async refundFullOrder(

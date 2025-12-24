@@ -6,7 +6,7 @@ import { Cart } from '../cart/entities/cart.entity';
 import { CartItem } from '../cart/entities/cart-item.entity';
 import { User } from '../auth-base/user/entities/user.entity';
 import { Vendor } from '../vendors/entities/vendor.entity';
-import { Payment } from 'src/modules/core/payment/entities/payment.entity';
+import { Payment } from 'src/modules/app/payment/entities/payment.entity';
 import { AppDatabaseModule } from 'src/modules/core/app-database/app-database.module';
 import { Order } from './entities/order.entity';
 import { OrdersService } from './services/orders.service';
@@ -20,7 +20,7 @@ import { ProductsDataloader } from './dataloaders/product.dataloader';
 import { VendorDataloader } from '../product/dataloaders/vendor.dataloader';
 import { OrderDataloader } from './dataloaders/order.dataloader';
 import { PaymentDataloader } from './dataloaders/payment.dataloader';
-import { PaymentModule } from 'src/modules/core/payment/payment.module';
+import { PaymentModule } from 'src/modules/app/payment/payment.module';
 import { NotificationModule } from '../notification/notification.module';
 
 @Module({

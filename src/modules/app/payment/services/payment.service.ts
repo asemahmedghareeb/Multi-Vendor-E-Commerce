@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectAppRepository } from 'src/common/decorators/inject-app-repository.decorator';
 import { Payment } from '../entities/payment.entity';
-import { AppRepository } from '../../app-database/repositories/app.repository';
+import { AppRepository } from '../../../core/app-database/repositories/app.repository';
 import { CurrenciesEnum } from 'src/common/enums/currency.enum';
 import { ModuleRef } from '@nestjs/core';
 import { PaymentGatewaysEnum } from '../enums/payment-gateways.enum';
@@ -131,7 +131,7 @@ export class PaymentService {
       const orderItem = await this.orderItemRepository.findOneOrFail({
         where: {
           id: itemInput.orderItemId,
-          order: { id: payment.order.id },
+          orderId: payment.order.id,
         },
         relations: ['product'],
       });

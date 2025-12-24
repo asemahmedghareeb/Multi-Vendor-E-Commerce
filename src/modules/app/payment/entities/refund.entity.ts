@@ -1,7 +1,7 @@
 import { ObjectType, Field, Float } from '@nestjs/graphql';
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Payment } from './payment.entity';
-import { AppBaseEntity } from '../../app-database/entities/app-base.entity';
+import { AppBaseEntity } from '../../../core/app-database/entities/app-base.entity';
 import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
 
 @ObjectType()

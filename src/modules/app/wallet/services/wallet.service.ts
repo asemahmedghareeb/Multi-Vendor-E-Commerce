@@ -30,7 +30,7 @@ export class WalletsService {
 
   private async findOrCreateWalletForUser(user: User): Promise<Wallet> {
     const wallet = await this.walletRepo.findOne({
-      where: { user: { id: user.id } },
+      where: { user_id: user.id },
     });
     if (wallet) {
       return wallet;
@@ -57,7 +57,6 @@ export class WalletsService {
     });
 
     for (const item of order.items) {
-      console.log('item', item);
       const vendor = await this.vendorRepo.findOneOrFail({
         where: { id: item.vendorId },
         relations: ['user'],
@@ -79,7 +78,6 @@ export class WalletsService {
 
       vendorWallet.balance += vendorIncome;
       await this.walletRepo.save(vendorWallet);
-      console.log('vendorWallet', vendorWallet);
 
       const vendorTx = this.txRepo.create({
         wallet: vendorWallet,

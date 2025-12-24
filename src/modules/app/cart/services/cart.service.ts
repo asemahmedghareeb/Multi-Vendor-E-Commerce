@@ -42,7 +42,7 @@ export class CartService {
 
     // 2. Fetch from DB if miss
     let cart = await this.cartRepo.findOne({
-      where: { user: { id: userId } },
+      where: { user_Id: userId },
       relations: ['items', 'items.product', 'items.product.vendor'],
     });
 
@@ -61,7 +61,7 @@ export class CartService {
   async getCart(user: User, pagination?: PaginatorInput) {
     const { page = 1, limit = 15 } = pagination || {};
     let cart = await this.cartRepo.findOne({
-      where: { user: { id: user.id } },
+      where: { user_Id: user.id},
       order: { items: { createdAt: 'ASC' } },
       relations: ['items'],
     });
@@ -89,7 +89,7 @@ export class CartService {
   async addToCart(user: User, input: AddToCartInput): Promise<Cart> {
     const userId = user.id;
     let cart = await this.cartRepo.findOne({
-      where: { user: { id: userId } },
+      where: { user_Id: userId },
       relations: ['items', 'items.product'],
     });
 
@@ -157,7 +157,7 @@ export class CartService {
   ): Promise<boolean> {
     const userId = user.id;
     const cart = await this.cartRepo.findOneOrFail({
-      where: { user: { id: userId } },
+      where: { user_Id: userId },
       relations: ['items', 'items.product'],
     });
 
@@ -179,7 +179,7 @@ export class CartService {
 
   async removeFromCart(user: User, cartItemId: string): Promise<boolean> {
     const cart = await this.cartRepo.findOneOrFail({
-      where: { user: { id: user.id } },
+      where: { user_Id: user.id},
       relations: ['items', 'items.product'],
     });
 

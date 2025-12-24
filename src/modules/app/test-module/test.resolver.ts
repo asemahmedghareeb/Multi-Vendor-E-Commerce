@@ -26,9 +26,9 @@ import { DefaultPermissionActionsEnum } from 'src/common/enums/default-permissio
 import { User } from '../auth-base/user/entities/user.entity';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { RequireAppCheck } from 'src/modules/core/app-check/decorator/app-check.decorator';
-import { Payment } from 'src/modules/core/payment/entities/payment.entity';
-import { PaymentService } from 'src/modules/core/payment/services/payment.service';
-import { PaymentGatewaysEnum } from 'src/modules/core/payment/enums/payment-gateways.enum';
+import { Payment } from 'src/modules/app/payment/entities/payment.entity';
+import { PaymentService } from 'src/modules/app/payment/services/payment.service';
+import { PaymentGatewaysEnum } from 'src/modules/app/payment/enums/payment-gateways.enum';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { MoneyScalar } from 'src/common/scalars/money.scalar';
 import { TestCreatePaymentIntent } from './inputs/test-create-payment-intent.input';

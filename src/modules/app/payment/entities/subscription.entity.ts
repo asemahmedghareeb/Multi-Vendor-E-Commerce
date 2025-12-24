@@ -1,7 +1,7 @@
 import { Field } from '@nestjs/graphql';
 import { Column, Entity } from 'typeorm';
 import { PaymentGatewaysEnum } from '../enums/payment-gateways.enum';
-import { AppBaseEntity } from '../../app-database/entities/app-base.entity';
+import { AppBaseEntity } from '../../../core/app-database/entities/app-base.entity';
 import { SubscriptionStatusEnum } from '../enums/subscription-status.enum';
 import { TimestampScalar } from 'src/common/scalars/timestamp.scalar';
 

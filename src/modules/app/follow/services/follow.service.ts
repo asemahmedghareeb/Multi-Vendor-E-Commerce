@@ -7,7 +7,6 @@ import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
 import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
 import { InjectAppRepository } from 'src/common/decorators/inject-app-repository.decorator';
 import { AppRepository } from 'src/modules/core/app-database/repositories/app.repository';
-import { FindOptionsRelations } from 'typeorm';
 
 @Injectable()
 export class FollowsService {
@@ -17,8 +16,10 @@ export class FollowsService {
     @InjectAppRepository(Vendor) private vendorRepo: AppRepository<Vendor>,
   ) {}
 
-  async follow(userId: string, vendorId: string): Promise<boolean> {
-    const user = await this.userRepo.findOneOrFail({ where: { id: userId } });
+  async follow(followerId: string, vendorId: string): Promise<boolean> {
+    const user = await this.userRepo.findOneOrFail({
+      where: { id: followerId },
+    });
     const vendor = await this.vendorRepo.findOneOrFail({
       where: { id: vendorId },
     });
@@ -28,33 +29,33 @@ export class FollowsService {
     }
     const existing = await this.followRepo.findOne({
       where: {
-        follower: { id: userId },
-        vendor: { id: vendorId },
+        followerId,
+        vendorId,
       },
     });
 
     if (existing) return true;
 
     const follow = this.followRepo.create({
-      follower: { id: userId },
+      follower: { id: followerId },
       vendor: { id: vendorId },
     });
 
     await this.followRepo.save(follow);
-    await this.userRepo.increment({ id: userId }, 'followingCount', 1);
+    await this.userRepo.increment({ id: followerId }, 'followingCount', 1);
     await this.vendorRepo.increment({ id: vendorId }, 'followersCount', 1);
 
     return true;
   }
-  async unfollow(userId: string, vendorId: string): Promise<boolean> {
+  async unfollow(followerId: string, vendorId: string): Promise<boolean> {
     const result = await this.followRepo.delete({
-      follower: { id: userId },
-      vendor: { id: vendorId },
+      followerId,
+      vendorId,
     });
 
     if (result.affected && result.affected > 0) {
       await this.vendorRepo.decrement({ id: vendorId }, 'followersCount', 1);
-      await this.userRepo.decrement({ id: userId }, 'followingCount', 1);
+      await this.userRepo.decrement({ id: followerId }, 'followingCount', 1);
     }
     return true;
   }
@@ -62,11 +63,14 @@ export class FollowsService {
   async getMyFollowers(user: User, pagination: PaginatorInput) {
     const { page, limit } = pagination;
     return await this.followRepo.findPaginated(
-      { follower: { id: user.id } },
+      { followerId: user.id },
       { createdAt: 'DESC' },
       page,
       limit,
-      ['user'] as FindOptionsRelations<Follow>,
+      {
+        follower: true,
+        vendor: true,
+      },
     );
   }
 }

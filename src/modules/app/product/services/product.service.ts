@@ -17,7 +17,7 @@ import { User } from '../../auth-base/user/entities/user.entity';
 import { Vendor } from '../../vendors/entities/vendor.entity';
 import { Category } from '../../categories/entities/category.entity';
 import { Follow } from '../../follow/entities/follow.entity';
-import { GetProductsFilterInput } from '../dto/inputs/product-filter.input';
+import { GetProductsFilterInput } from '../dto/inputs/pagination.input';
 import { AppHttpException } from 'src/common/exceptions/app-http.exception';
 import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
 import { VendorStatus } from '../../vendors/enums/vendor-status.enum';
@@ -68,12 +68,10 @@ export class ProductService {
 
   // }
 
-
-
   async create(userId: string, input: CreateProductInput): Promise<Product> {
     const vendor = await this.vendorRepo.findOneOrFail(
       {
-        where: { user: { id: userId } },
+        where: { userId },
       },
       ErrorCodeEnum.VENDOR_NOT_FOUND,
     );
@@ -157,37 +155,43 @@ export class ProductService {
     );
   }
 
-  async findAll(input: GetProductsFilterInput) {
-    let { page, limit, search, vendorName, categoryName, minPrice, maxPrice } =
-      input;
+  async findAll(input?: GetProductsFilterInput) {
+    const page = input?.paginate?.page;
+    const limit = input?.paginate?.limit;
+
     const where: FindOptionsWhere<Product> = {};
-
-    if (minPrice !== undefined && maxPrice !== undefined) {
-      where.price = Between(minPrice * 100, maxPrice * 100);
-    } else if (minPrice !== undefined) {
-      where.price = MoreThanOrEqual(minPrice * 100);
-    } else if (maxPrice !== undefined) {
-      where.price = LessThanOrEqual(maxPrice * 100);
-    }
-
-    if (vendorName) {
-      where.vendor = { businessName: ILike(`%${vendorName}%`) };
-    }
-
-    if (categoryName) {
-      where.category = { name: ILike(`%${categoryName}%`) };
-    }
-
     let finalWhere: FindOptionsWhere<Product> | FindOptionsWhere<Product>[] =
       where;
 
-    if (search) {
-      finalWhere = [
-        { ...where, name: ILike(`%${search}%`) },
-        { ...where, description: ILike(`%${search}%`) },
-      ];
-    }
+    if (input?.productFilter) {
+      const { search, vendorName, categoryName, minPrice, maxPrice } =
+        input.productFilter;
 
+      if (minPrice !== undefined && maxPrice !== undefined) {
+        where.price = Between(minPrice * 100, maxPrice * 100);
+      } else if (minPrice !== undefined) {
+        where.price = MoreThanOrEqual(minPrice * 100);
+      } else if (maxPrice !== undefined) {
+        where.price = LessThanOrEqual(maxPrice * 100);
+      }
+
+      if (vendorName) {
+        where.vendor = { businessName: ILike(`%${vendorName}%`) };
+      }
+
+      if (categoryName) {
+        where.category = { name: ILike(`%${categoryName}%`) };
+      }
+
+      if (search) {
+        finalWhere = [
+          { ...where, name: ILike(`%${search}%`) },
+          { ...where, description: ILike(`%${search}%`) },
+        ];
+      } else {
+        finalWhere = where;
+      }
+    }
     return await this.productRepo.findPaginated(
       finalWhere,
       { createdAt: 'DESC' },
@@ -216,9 +220,9 @@ export class ProductService {
   async update(user: User, input: UpdateProductInput): Promise<Product> {
     const product = await this.productRepo.findOneOrFail({
       where: { id: input.id },
-      relations: {
-        vendor: true,
-      },
+      // relations: {
+      //   vendor: true,
+      // },
     });
     await this.checkOwnership(product, user);
 
@@ -266,12 +270,12 @@ export class ProductService {
 
   private async checkOwnership(product: Product, user: User) {
     const vendorProfile = await this.vendorRepo.findOne({
-      where: { user: { id: user.id } },
+      where: { userId: user.id },
     });
 
     if (
       vendorProfile &&
-      product.vendor.id !== vendorProfile.id &&
+      product.vendorId !== vendorProfile.id &&
       user.role !== UserRoleEnum.ADMIN
     ) {
       throw new AppHttpException(ErrorCodeEnum.FORBIDDEN);
@@ -283,7 +287,7 @@ export class ProductService {
     const limit = pagination.limit;
 
     return await this.productRepo.findPaginated(
-      { vendor: { id: vendorId } },
+      { vendorId },
       { createdAt: 'DESC' },
       page,
       limit,
@@ -295,7 +299,7 @@ export class ProductService {
     const limit = pagination.limit;
 
     return await this.productRepo.findPaginated(
-      { category: { id: categoryId } },
+      { categoryId },
       { createdAt: 'DESC' },
       page,
       limit,
