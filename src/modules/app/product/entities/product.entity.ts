@@ -12,6 +12,7 @@ import { Category } from '../../categories/entities/category.entity';
 import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
 import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
 import { File } from 'src/modules/core/media/entities/file.entity';
+import { MoneyScalar } from 'src/common/scalars/money.scalar';
 
 @ObjectType()
 @Entity('products')
@@ -26,13 +27,13 @@ export class Product extends AppBaseEntity {
   @Column()
   description: string;
 
-  @Field(() => Float)
+  @Field(() => MoneyScalar)
   @Column({
     type: 'bigint',
-    transformer: {
-      to: (value: number) => value,
-      from: (value: string) => parseInt(value, 10),
-    },
+    // transformer: {
+    //   to: (value: number) => value,
+    //   from: (value: string) => parseInt(value, 10),
+    // },
   })
   price: number;
 
@@ -40,7 +41,7 @@ export class Product extends AppBaseEntity {
   @Column({ type: 'int', default: 0 })
   inventoryCount: number;
 
-  @Field(() => [File], { nullable: true , defaultValue: []})
+  @Field(() => [File], { nullable: true, defaultValue: [] })
   @OneToMany(() => File, (file) => file.product, {
     cascade: true,
   })
@@ -50,7 +51,6 @@ export class Product extends AppBaseEntity {
   @ManyToOne(() => Vendor, (vendor) => vendor.products)
   @JoinColumn({ name: 'vendorId' })
   vendor: Vendor;
-
 
   @Column()
   vendorId: string;

@@ -13,6 +13,7 @@ import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.e
 import { User } from '../../auth-base/user/entities/user.entity';
 import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
 import { Payment } from 'src/modules/app/payment/entities/payment.entity';
+import { MoneyScalar } from 'src/common/scalars/money.scalar';
 
 @ObjectType()
 @Entity('orders')
@@ -26,13 +27,13 @@ export class Order extends AppBaseEntity {
   @Column()
   userId: string;
 
-  @Field(() => Float)
+  @Field(() => MoneyScalar)
   @Column({
     type: 'bigint',
-    transformer: {
-      to: (value: number) => value,
-      from: (value: string) => parseInt(value, 10),
-    },
+    // transformer: {
+    //   to: (value: number) => value,
+    //   from: (value: string) => parseInt(value, 10),
+    // },
   })
   totalAmount: number;
 

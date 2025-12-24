@@ -5,15 +5,16 @@ import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.e
 import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
 import { Wallet } from './wallet.entity';
 import { TransactionType } from '../enums/transactions.enum';
+import { MoneyScalar } from 'src/common/scalars/money.scalar';
 
 @ObjectType()
 @Entity('wallet_transactions')
 @GeneratePermissions()
 export class WalletTransaction extends AppBaseEntity {
-  @Field(() => Float)
+  @Field(() => MoneyScalar)
   @Column({
     type: 'bigint',
-    transformer: { to: (v) => v, from: (v) => parseInt(v, 10) },
+    // transformer: { to: (v) => v, from: (v) => parseInt(v, 10) },
   })
   amount: number;
 

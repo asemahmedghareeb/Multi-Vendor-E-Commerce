@@ -5,10 +5,12 @@ import { FileUseCaseEnum } from '../enums/file-use-case.enum';
 import { FileModelEnum } from '../enums/file-model.enum';
 import { AppBaseEntity } from '../../app-database/entities/app-base.entity';
 import { Product } from 'src/modules/app/product/entities/product.entity';
+import { GeneratePermissions } from 'src/common/decorators/generate-entity-permissions.decorator';
 
 
 @Entity('files')
 @ObjectType()
+@GeneratePermissions()
 export class File extends AppBaseEntity {
   @ApiProperty({
     example:

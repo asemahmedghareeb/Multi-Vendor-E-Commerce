@@ -10,6 +10,7 @@ import {
 } from 'class-validator';
 
 import { ValidationErrorMessageEnum } from 'src/common/enums/validation-error-message.enum';
+import { MoneyScalar } from 'src/common/scalars/money.scalar';
 
 @InputType()
 export class CreateProductInput {
@@ -23,7 +24,7 @@ export class CreateProductInput {
   @IsNotEmpty({ message: ValidationErrorMessageEnum.NOT_EMPTY })
   description: string;
 
-  @Field(() => Float)
+  @Field(() => MoneyScalar)
   @IsNumber(
     {},
     { message: ValidationErrorMessageEnum.IS_NUMBER },

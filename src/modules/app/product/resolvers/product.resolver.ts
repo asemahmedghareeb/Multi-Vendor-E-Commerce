@@ -11,7 +11,7 @@ import { Auth } from 'src/common/decorators/auth.decorator';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { DefaultPermissionActionsEnum } from 'src/common/enums/default-permissions.enum';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
-import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
+import { NullablePaginatorArgsInput, PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
 import { User } from '../../auth-base/user/entities/user.entity';
 import { Category } from '../../categories/entities/category.entity';
 import { Vendor } from '../../vendors/entities/vendor.entity';
@@ -31,6 +31,7 @@ import { AppRepository } from 'src/modules/core/app-database/repositories/app.re
 import { File } from 'src/modules/core/media/entities/file.entity';
 import { PresignedUrlPayload } from '../dto/responses/presigned-url-payload';
 import { ParseUUIDPipe } from '@nestjs/common';
+import { FilesPaginated } from 'src/modules/core/media/dtos/responses/file-paginated.responese';
 
 @Resolver(() => Product)
 export class ProductsResolver {
@@ -173,7 +174,21 @@ export class ProductsResolver {
   //   return urls;
   // }
 
-  @ResolveField(() => Vendor)
+  @Auth()
+  @Query(() => FilesPaginated)
+  async productImages(
+    @CurrentUser() user: User,
+    @Args('productId', ParseUUIDPipe) productId: string,
+    @Args('input', { nullable: true }) input: PaginatorInput,
+  ): Promise<any> {
+    return this.productService.productImages(
+      user,
+      productId,
+      input,
+    );
+  }
+
+  @ResolveField(() => Vendor) 
   async vendor(@Parent() product: Product) {
     if (product.vendor) return product.vendor;
     return this.vendorDataLoader.getDataloader().load(product.vendorId);

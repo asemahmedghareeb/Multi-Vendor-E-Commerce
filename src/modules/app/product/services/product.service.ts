@@ -23,6 +23,7 @@ import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
 import { VendorStatus } from '../../vendors/enums/vendor-status.enum';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
 import { File } from 'src/modules/core/media/entities/file.entity';
+import { FileReferenceService } from 'src/modules/core/media/services/file-reference.service';
 @Injectable()
 export class ProductService {
   constructor(
@@ -36,37 +37,8 @@ export class ProductService {
     private readonly followRepo: AppRepository<Follow>,
     @InjectAppRepository(File)
     private readonly fileRepo: AppRepository<File>,
+    private readonly fileReferenceService: FileReferenceService,
   ) {}
-
-  // async assignImage(
-  //   user: User,
-  //   productId: string,
-  //   fileId: string,
-  // ): Promise<Product> {
-  //     const product = await this.productRepo.findOneOrFail({
-  //       where: { id: productId },
-  //       relations: { vendor: true },
-  //     });
-
-  //     await this.checkOwnership(product, user);
-
-  //     const file = await this.fileRepo.findOneOrFail({
-  //       where: { id: fileId },
-  //     });
-
-  //     if (file.hasReference) {
-  //       throw new AppHttpException(ErrorCodeEnum.FILE_ALREADY_IN_USE);
-  //     }
-
-  //     product.images = [...(product.images || []), file.id];
-  //     file.hasReference = true;
-
-  //     await this.productRepo.save(product);
-  //     await this.fileRepo.save(file);
-
-  //     return product;
-
-  // }
 
   async create(userId: string, input: CreateProductInput): Promise<Product> {
     const vendor = await this.vendorRepo.findOneOrFail(
@@ -168,11 +140,11 @@ export class ProductService {
         input.productFilter;
 
       if (minPrice !== undefined && maxPrice !== undefined) {
-        where.price = Between(minPrice * 100, maxPrice * 100);
+        where.price = Between(minPrice, maxPrice);
       } else if (minPrice !== undefined) {
-        where.price = MoreThanOrEqual(minPrice * 100);
+        where.price = MoreThanOrEqual(minPrice);
       } else if (maxPrice !== undefined) {
-        where.price = LessThanOrEqual(maxPrice * 100);
+        where.price = LessThanOrEqual(maxPrice);
       }
 
       if (vendorName) {
@@ -192,11 +164,21 @@ export class ProductService {
         finalWhere = where;
       }
     }
+
+    const orderBy: Record<string, 'ASC' | 'DESC'> = {};
+    if (input?.orderBy?.field && input?.orderBy?.order) {
+      orderBy[input.orderBy.field] = input.orderBy.order;
+    } else {
+      orderBy.createdAt = 'DESC';
+    }
+
     return await this.productRepo.findPaginated(
       finalWhere,
-      { createdAt: 'DESC' },
+      orderBy,
       page,
       limit,
+      undefined,
+
       // {
       //   vendor: true,
       //   category: true,
@@ -217,12 +199,49 @@ export class ProductService {
     return product;
   }
 
+  async productImages(
+    user: User,
+    productId: string,
+    pagination: PaginatorInput,
+  ) {
+    const page = pagination.page || 1;
+    const limit = pagination.limit || 10;
+
+    const product = await this.productRepo.findOneOrFail(
+      { where: { id: productId }, relations: ['images'] },
+      ErrorCodeEnum.PRODUCT_DOES_NOT_EXIST,
+    );
+
+    this.checkOwnership(product, user);
+
+    const imageIds =
+      product.images?.map((img) => (typeof img === 'string' ? img : img.id)) ||
+      [];
+
+    if (imageIds.length === 0) {
+      return {
+        items: [],
+        pageInfo: {
+          page,
+          limit,
+          totalCount: 0,
+          hasNext: false,
+          hasPrevious: false,
+        },
+      };
+    }
+
+    return await this.fileRepo.findPaginated(
+      { id: In(imageIds) },
+      { createdAt: 'DESC' },
+      page,
+      limit,
+    );
+  }
+
   async update(user: User, input: UpdateProductInput): Promise<Product> {
     const product = await this.productRepo.findOneOrFail({
       where: { id: input.id },
-      // relations: {
-      //   vendor: true,
-      // },
     });
     await this.checkOwnership(product, user);
 
@@ -235,7 +254,7 @@ export class ProductService {
     }
 
     if (input.price !== undefined) {
-      product.price = Math.round(input.price * 100);
+      product.price = input.price;
     }
 
     if (input.name) product.name = input.name;
@@ -250,6 +269,9 @@ export class ProductService {
         throw new AppHttpException(ErrorCodeEnum.FILE_DOES_NOT_EXIST);
       }
       product.images = imageFiles;
+      this.fileReferenceService.setFilesReference(
+        product.images.map((file) => file.id),
+      );
     }
 
     return this.productRepo.save(product);

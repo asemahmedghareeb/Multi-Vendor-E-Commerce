@@ -13,6 +13,7 @@ import { PresignedUrlService } from './services/presigned-url.service';
 import { PresignedUrlResolver } from './resolvers/presigned-url.resolver';
 import { FillValidationHookGuard } from './guards/file-validation-hook.guard';
 import { FileResolver } from './resolvers/file.resolver';
+import { FileReferenceService } from './services/file-reference.service';
 
 @Module({
   imports: [AppDatabaseModule.forFeature([File])],
@@ -28,8 +29,9 @@ import { FileResolver } from './resolvers/file.resolver';
     PresignedUrlResolver,
     FillValidationHookGuard,
     FileResolver,
+    FileReferenceService,
   ],
-  exports: [PresignedUrlService],
+  exports: [PresignedUrlService, FileReferenceService],
   controllers: [MediaController],
 })
 export class MediaModule {}

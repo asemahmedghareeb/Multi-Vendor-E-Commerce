@@ -37,9 +37,9 @@ export class ReviewsService {
   async create(userId: string, input: CreateReviewInput): Promise<Review> {
     this.reviewRepo.findOneAndFail({
       where: {
-        user: { id: userId },
-        vendor: { id: input.vendorId },
-        order: { id: input.orderId },
+        userId,
+        vendorId: input.vendorId,
+        orderId: input.orderId,
       },
     });
 

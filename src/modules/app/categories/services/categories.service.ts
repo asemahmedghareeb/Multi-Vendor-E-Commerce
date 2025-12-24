@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { FindOptionsRelations, IsNull } from 'typeorm';
+import {  IsNull } from 'typeorm';
 import { Category } from '../entities/category.entity';
 import { CreateCategoryInput } from '../dto/inputs/create-category.input';
 import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';

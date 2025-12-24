@@ -1,6 +1,7 @@
 import { Field, Float, InputType, Int } from "@nestjs/graphql";
 import { IsOptional, IsString, Min } from "class-validator";
 import { ValidationErrorMessageEnum } from "src/common/enums/validation-error-message.enum";
+import { MoneyScalar } from "src/common/scalars/money.scalar";
 
 @InputType()
 export class ProductFilterInput {
@@ -24,12 +25,12 @@ export class ProductFilterInput {
   @IsString({ message: ValidationErrorMessageEnum.IS_STRING })
   vendorName?: string;
 
-  @Field(() => Float, { nullable: true })
+  @Field(() => MoneyScalar, { nullable: true })
   @IsOptional()
   @Min(0, { message: ValidationErrorMessageEnum.MIN })
   minPrice?: number;
 
-  @Field(() => Float, { nullable: true })
+  @Field(() => MoneyScalar, { nullable: true })
   @IsOptional()
   @Min(0, { message: ValidationErrorMessageEnum.MAX })
   maxPrice?: number;
