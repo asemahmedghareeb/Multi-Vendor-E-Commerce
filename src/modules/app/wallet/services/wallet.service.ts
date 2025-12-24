@@ -188,14 +188,13 @@ export class WalletsService {
   }
 
   async executePayout(input: PayoutInput): Promise<WalletTransaction> {
-    const vendor = await this.vendorRepo.findOne({
-      where: { id: input.vendorId },
-      relations: ['user', 'user.wallet'],
-    });
-
-    if (!vendor || !vendor.user?.wallet) {
-      throw new AppHttpException(ErrorCodeEnum.VENDOR_NOT_FOUND);
-    }
+    const vendor = await this.vendorRepo.findOneOrFail(
+      {
+        where: { id: input.vendorId },
+        relations: ['user', 'user.wallet'],
+      },
+      ErrorCodeEnum.VENDOR_NOT_FOUND,
+    );
 
     const wallet = vendor.user.wallet;
     const payoutAmountCents = input.amount * 100;

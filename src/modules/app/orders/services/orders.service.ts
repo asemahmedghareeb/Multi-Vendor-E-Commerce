@@ -51,7 +51,6 @@ export class OrdersService {
           vendor: true,
         },
         user: true,
-
       },
     );
   }
