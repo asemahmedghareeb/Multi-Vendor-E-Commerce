@@ -21,10 +21,10 @@ export class WishlistService {
     private productRepo: AppRepository<Product>,
   ) {}
 
-  async getWishlist(user: User, pagination: PaginatorInput) {
-    const { page, limit } = pagination;
+  async getWishlist(user: User, pagination?: PaginatorInput) {
     let wishlist = await this.wishlistRepo.findOne({
       where: { userId: user.id },
+      relations: ['items', 'items.product', 'items.product.vendor'],
     });
 
     if (!wishlist) {
@@ -34,9 +34,13 @@ export class WishlistService {
     const paginatedItems = await this.wishlistItemRepo.findPaginated(
       { wishlistId: wishlist.id },
       { createdAt: 'DESC' },
-      page,
-      limit,
-      ['product', 'product.vendor'] as FindOptionsRelations<WishlistItem>,
+      pagination?.page,
+      pagination?.limit,
+      {
+        product: {
+          vendor: true,
+        },
+      },
     );
 
     return paginatedItems;
@@ -52,7 +56,7 @@ export class WishlistService {
 
   async addToWishlist(user: User, productId: string): Promise<Wishlist> {
     let wishlist = await this.wishlistRepo.findOne({
-      where: {userId: user.id},
+      where: { userId: user.id },
       relations: ['items', 'user'],
     });
 
@@ -84,18 +88,20 @@ export class WishlistService {
     userId: string,
     productId: string,
   ): Promise<Wishlist> {
-    const wishlist = await this.wishlistRepo.findOne({
-      where: { userId },
-      relations: ['items', 'user'],
-    });
+    const wishlist = await this.wishlistRepo.findOneOrFail(
+      {
+        where: { userId },
+        relations: ['items'],
+      },
+      ErrorCodeEnum.NOT_FOUND,
+    );
 
-    if (!wishlist) {
-      throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
-    }
-
-    const item = await this.wishlistItemRepo.findOneOrFail({
-      where: { wishlistId: wishlist.id, productId },
-    });
+    const item = await this.wishlistItemRepo.findOneOrFail(
+      {
+        where: { wishlistId: wishlist.id, productId },
+      },
+      ErrorCodeEnum.NOT_FOUND,
+    );
 
     await this.wishlistItemRepo.remove(item);
 

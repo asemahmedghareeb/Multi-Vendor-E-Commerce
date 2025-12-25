@@ -5,7 +5,7 @@ import { AddToWishlistInput } from '../dto/inputs/add-to-wishlist.input';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { User } from '../../auth-base/user/entities/user.entity';
-import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
+import { NullablePaginatorArgsInput, PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
 import { PaginatedWishlist } from '../dto/responses/paginaated-wishlist';
 
 @Resolver(() => Wishlist)
@@ -16,9 +16,9 @@ export class WishlistResolver {
   @Auth()
   async myWishlist(
     @CurrentUser() user: User,
-    @Args('pagination', { nullable: true }) pagination: PaginatorInput,
+    @Args( { nullable: true }) pagination: NullablePaginatorArgsInput,
   ) {
-    return this.wishlistService.getWishlist(user, pagination);
+    return this.wishlistService.getWishlist(user, pagination.paginate);
   }
 
   @Mutation(() => Wishlist)
@@ -30,8 +30,8 @@ export class WishlistResolver {
     return this.wishlistService.addToWishlist(user, input.productId);
   }
 
-  @Mutation(() => Wishlist)
   @Auth()
+  @Mutation(() => Wishlist)
   async removeFromWishlist(
     @Args('productId') productId: string,
     @CurrentUser() user: { userId: string },

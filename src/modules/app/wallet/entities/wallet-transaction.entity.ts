@@ -14,7 +14,6 @@ export class WalletTransaction extends AppBaseEntity {
   @Field(() => MoneyScalar)
   @Column({
     type: 'bigint',
-    // transformer: { to: (v) => v, from: (v) => parseInt(v, 10) },
   })
   amount: number;
 

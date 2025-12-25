@@ -22,6 +22,7 @@ import { OrderStatus } from '../../orders/enum/order-status.enum';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
 import { AppHttpException } from 'src/common/exceptions/app-http.exception';
 import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
+import { Wallet } from '../../wallet/entities/wallet.entity';
 
 @Injectable()
 export class VendorService {
@@ -36,6 +37,8 @@ export class VendorService {
     private readonly orderItemRepo: AppRepository<OrderItem>,
     @InjectAppRepository(Review)
     private readonly reviewRepo: AppRepository<Review>,
+    @InjectAppRepository(Wallet)
+    private readonly walletRepo: AppRepository<Wallet>,
     private readonly mailService: MailService,
     private readonly notificationService: NotificationService,
   ) {}
@@ -94,10 +97,15 @@ export class VendorService {
 
     const userEmail = vendor.user.email as string;
     if (status === VendorStatus.VERIFIED) {
-      console.log(vendor.status);
-      vendor.user.role = UserRoleEnum.VENDOR;
-      await this.userRepo.save(vendor.user);
       await this.vendorRepo.save(vendor);
+      const wallet= this.walletRepo.create({
+        user: vendor.user,
+        balance: 0,
+      })
+      
+      vendor.user.role = UserRoleEnum.VENDOR;
+      vendor.user.wallet = wallet;
+      await this.userRepo.save(vendor.user);
 
       this.mailService.sendEmailWithATemplate(
         userEmail,

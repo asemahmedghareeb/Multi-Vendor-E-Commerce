@@ -30,7 +30,7 @@ export class WalletsService {
 
   private async findOrCreateWalletForUser(user: User): Promise<Wallet> {
     const wallet = await this.walletRepo.findOne({
-      where: { user_id: user.id },
+      where: { userId: user.id },
     });
     if (wallet) {
       return wallet;
@@ -38,6 +38,8 @@ export class WalletsService {
     try {
       const newWallet = this.walletRepo.create({ user, balance: 0 });
       await this.walletRepo.save(newWallet);
+      user.wallet = newWallet;
+      await this.userRepo.save(user);
       return newWallet;
     } catch (error) {
       if (error.code === '23505') {
@@ -150,6 +152,7 @@ export class WalletsService {
       const itemRefundAmount = orderItem.priceAtPurchase * quantity;
 
       const rate = Number(vendor.commissionRate) / 100;
+
       const adminShare = Math.floor(itemRefundAmount * rate);
       const vendorShare = itemRefundAmount - adminShare;
 
@@ -189,25 +192,26 @@ export class WalletsService {
     const vendor = await this.vendorRepo.findOneOrFail(
       {
         where: { id: input.vendorId },
-        relations: ['user', 'user.wallet'],
+        relations: ['user'],
       },
       ErrorCodeEnum.VENDOR_NOT_FOUND,
     );
 
-    const wallet = vendor.user.wallet;
-    const payoutAmountCents = input.amount * 100;
+    const wallet = await this.findOrCreateWalletForUser(vendor.user);
 
-    if (wallet.balance < payoutAmountCents) {
+    console.log(wallet);
+
+    if (wallet.balance < input.amount) {
       throw new AppHttpException(ErrorCodeEnum.BAD_REQUEST_EXCEPTION);
     }
-    wallet.balance -= payoutAmountCents;
+    wallet.balance -= input.amount;
     await this.walletRepo.save(wallet);
 
     const tx = this.txRepo.create({
       wallet: wallet,
-      amount: -payoutAmountCents,
+      amount: -input.amount,
       type: TransactionType.PAYOUT,
-      description: `Payout of $${input.amount} to Vendor ${vendor.businessName}`,
+      description: `Payout of $${input.amount / 100} to Vendor ${vendor.businessName}`,
     });
 
     const savedTx = await this.txRepo.save(tx);

@@ -11,10 +11,18 @@ import { Review } from '../reviews/entities/review.entity';
 import { Product } from '../product/entities/product.entity';
 import { OrderItem } from '../orders/entities/order-item.entity';
 import { VendorsResolver } from './resolvers/vendors.resolver';
+import { Wallet } from '../wallet/entities/wallet.entity';
 
 @Module({
   imports: [
-    AppDatabaseModule.forFeature([User, Vendor, Review, Product, OrderItem]),
+    AppDatabaseModule.forFeature([
+      User,
+      Vendor,
+      Review,
+      Product,
+      OrderItem,
+      Wallet,
+    ]),
     MailModule,
     NotificationModule,
     SessionModule,
