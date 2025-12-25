@@ -11,7 +11,9 @@ import { FollowsService } from '../services/follow.service';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { User } from '../../auth-base/user/entities/user.entity';
 import { Auth } from 'src/common/decorators/auth.decorator';
-import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
+import {
+  NullablePaginatorArgsInput,
+} from 'src/common/dtos/inputs/paginator.input';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
 import { FollowersPaginated } from '../dto/paginated-follow.type';
 // import { UserDataloader } from '../auth-base/session/dataloaders/user.dataloader';
@@ -46,10 +48,10 @@ export class FollowsResolver {
   })
   @Query(() => FollowersPaginated)
   async myFollowers(
-    @Args('pagination') pagination: PaginatorInput,
+    @Args({ nullable: true }) pagination: NullablePaginatorArgsInput,
     @CurrentUser() user: User,
   ) {
-    return this.followsService.getMyFollowers(user, pagination);
+    return this.followsService.getMyFollowers(user, pagination.paginate);
   }
 
   // @ResolveField(() => User)

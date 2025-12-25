@@ -13,7 +13,7 @@ import { ProductsDataloader } from '../dataloaders/product.dataloader';
 import { VendorDataloader } from '../../product/dataloaders/vendor.dataloader';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { User } from '../../auth-base/user/entities/user.entity';
-import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
+import { NullablePaginatorArgsInput } from 'src/common/dtos/inputs/paginator.input';
 import { OrderItemService } from '../services/order-item.service';
 import { Order } from '../entities/order.entity';
 import { OrderDataloader } from '../dataloaders/order.dataloader';
@@ -45,9 +45,9 @@ export class OrderItemResolver {
   @Query(() => [OrderItem])
   async vendorOrders(
     @CurrentUser() user: User,
-    @Args('pagination') pagination: PaginatorInput,
+    @Args({nullable: true}) pagination: NullablePaginatorArgsInput,
   ) {
-    return this.orderItemService.getVendorOrderedItems(user.id, pagination);
+    return this.orderItemService.getVendorOrderedItems(user.id, pagination.paginate);
   }
 
   @Auth({

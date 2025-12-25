@@ -5,7 +5,7 @@ import { AddToWishlistInput } from '../dto/inputs/add-to-wishlist.input';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { User } from '../../auth-base/user/entities/user.entity';
-import { NullablePaginatorArgsInput, PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
+import { NullablePaginatorArgsInput } from 'src/common/dtos/inputs/paginator.input';
 import { PaginatedWishlist } from '../dto/responses/paginaated-wishlist';
 
 @Resolver(() => Wishlist)

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {  IsNull } from 'typeorm';
+import { IsNull } from 'typeorm';
 import { Category } from '../entities/category.entity';
 import { CreateCategoryInput } from '../dto/inputs/create-category.input';
 import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
@@ -34,16 +34,15 @@ export class CategoriesService {
     return this.categoryRepo.save(category);
   }
 
-  async findAll(pagination: PaginatorInput) {
-    const { page, limit } = pagination;
+  async findAll(pagination?: PaginatorInput) {
     return this.categoryRepo.findPaginated(
       { parent: IsNull() },
       { createdAt: 'DESC' },
-      page,
-      limit,
-     {
-      parent: true,
-     }
+      pagination?.page,
+      pagination?.limit,
+      {
+        parent: true,
+      },
     );
   }
 

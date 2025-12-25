@@ -60,18 +60,17 @@ export class FollowsService {
     return true;
   }
 
-  async getMyFollowers(user: User, pagination: PaginatorInput) {
+  async getMyFollowers(user: User, pagination?: PaginatorInput) {
     const vendor = await this.vendorRepo.findOneOrFail({
       where: {
         userId: user.id,
       },
     });
-    const { page, limit } = pagination;
     const followers = await this.followRepo.findPaginated(
       { vendorId: vendor.id },
       { createdAt: 'DESC' },
-      page,
-      limit,
+      pagination?.page,
+      pagination?.limit,
       {
         follower: true,
         vendor: true,

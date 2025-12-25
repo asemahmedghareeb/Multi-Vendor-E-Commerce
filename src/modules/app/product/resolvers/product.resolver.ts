@@ -11,7 +11,7 @@ import { Auth } from 'src/common/decorators/auth.decorator';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { DefaultPermissionActionsEnum } from 'src/common/enums/default-permissions.enum';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
-import { NullablePaginatorArgsInput, PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
+import { NullablePaginatorArgsInput } from 'src/common/dtos/inputs/paginator.input';
 import { User } from '../../auth-base/user/entities/user.entity';
 import { Category } from '../../categories/entities/category.entity';
 import { Vendor } from '../../vendors/entities/vendor.entity';
@@ -44,22 +44,6 @@ export class ProductsResolver {
     private readonly fileRepository: AppRepository<File>,
   ) {}
 
-  // @Auth({
-  //   roles: [UserRoleEnum.VENDOR],
-  // })
-  // @Mutation(() => PresignedUrlPayload)
-  // @Transactional()
-  // async generateProductImageUploadUrl(
-  //   @Args('input') input: GeneratePresignedUrlInput,
-  // ): Promise<PresignedUrlPayload> {
-  //   const { presignedUrl, file } =
-  //     await this.presignedUrlService.getUploadPresignedUrl({
-  //       ...input,
-  //       fileUseCase: FileUseCaseEnum.PRODUCT_IMAGE,
-  //     });
-
-  //   return { presignedUrl, fileId: file.id };
-  // }
 
 
   @Auth({
@@ -84,10 +68,10 @@ export class ProductsResolver {
   @Auth()
   async userFeed(
     @CurrentUser() user: User,
-    @Args('pagination', { nullable: true })
-    pagination: PaginatorInput,
+    @Args({ nullable: true })
+    pagination: NullablePaginatorArgsInput,
   ) {
-    return this.productService.getUserFeed(user, pagination);
+    return this.productService.getUserFeed(user, pagination.paginate);
   }
 
   // @Auth()
@@ -167,12 +151,12 @@ export class ProductsResolver {
   async productImages(
     @CurrentUser() user: User,
     @Args('productId', ParseUUIDPipe) productId: string,
-    @Args('input', { nullable: true }) input: PaginatorInput,
+    @Args( { nullable: true }) input: NullablePaginatorArgsInput,
   ): Promise<any> {
     return this.productService.productImages(
       user,
       productId,
-      input,
+      input.paginate,
     );
   }
 

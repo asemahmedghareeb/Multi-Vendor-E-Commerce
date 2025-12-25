@@ -9,7 +9,7 @@ import {
 import { CategoriesService } from '../services/categories.service';
 import { Category } from '../entities/category.entity';
 import { CreateCategoryInput } from '../dto/inputs/create-category.input';
-import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
+import { NullablePaginatorArgsInput } from 'src/common/dtos/inputs/paginator.input';
 import { PaginatedCategories } from '../dto/responses/paginatedCategories';
 import { UpdateCategoryInput } from '../dto/inputs/update-category.input';
 import { Auth } from 'src/common/decorators/auth.decorator';
@@ -44,9 +44,9 @@ export class CategoriesResolver {
 
   @Query(() => PaginatedCategories)
   async categories(
-    @Args('pagination', { nullable: true }) pagination: PaginatorInput,
+    @Args( { nullable: true }) pagination: NullablePaginatorArgsInput,
   ) {
-    return this.categoriesService.findAll(pagination);
+    return this.categoriesService.findAll(pagination.paginate);
   }
 
   @Query(() => Category)

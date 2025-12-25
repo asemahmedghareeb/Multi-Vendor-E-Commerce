@@ -6,7 +6,6 @@ import { User } from '../../auth-base/user/entities/user.entity';
 import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
 import { FindOptionsRelations } from 'typeorm';
 
-
 export class WalletTransactionService {
   constructor(
     @InjectAppRepository(WalletTransaction)
@@ -15,8 +14,7 @@ export class WalletTransactionService {
     private readonly walletRepository: AppRepository<Wallet>,
   ) {}
 
-  async walletTransactions(user: User, input: PaginatorInput) {
-    const { page, limit } = input;
+  async walletTransactions(user: User, input?: PaginatorInput) {
     const wallet = await this.walletRepository.findOneOrFail({
       where: { user },
     });
@@ -24,8 +22,8 @@ export class WalletTransactionService {
     return await this.walletTransactionRepository.findPaginated(
       { walletId: wallet.id },
       { createdAt: 'DESC' },
-      page,
-      limit,
+      input?.limit,
+      input?.page,
       ['wallet', 'order'] as FindOptionsRelations<WalletTransaction>,
     );
   }

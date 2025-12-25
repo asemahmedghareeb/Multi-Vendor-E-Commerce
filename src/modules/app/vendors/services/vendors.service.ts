@@ -43,15 +43,12 @@ export class VendorService {
     private readonly notificationService: NotificationService,
   ) {}
 
-  async findAll(pagination: PaginatorInput) {
-    const page = pagination?.page || 1;
-    const limit = pagination?.limit || 10;
-
+  async findAll(pagination?: PaginatorInput) {
     return this.vendorRepo.findPaginated(
       undefined,
       { createdAt: 'DESC' },
-      page,
-      limit,
+      pagination?.page,
+      pagination?.limit,
     );
   }
 
@@ -98,11 +95,11 @@ export class VendorService {
     const userEmail = vendor.user.email as string;
     if (status === VendorStatus.VERIFIED) {
       await this.vendorRepo.save(vendor);
-      const wallet= this.walletRepo.create({
+      const wallet = this.walletRepo.create({
         user: vendor.user,
         balance: 0,
-      })
-      
+      });
+
       vendor.user.role = UserRoleEnum.VENDOR;
       vendor.user.wallet = wallet;
       await this.userRepo.save(vendor.user);
@@ -171,20 +168,12 @@ export class VendorService {
 
   async vendorProducts(
     vendorId: string,
-    pagination: PaginatorInput,
+    pagination?: PaginatorInput,
     name?: string,
   ) {
-    const { limit, page } = pagination;
     const where: FindOptionsWhere<Product> = {
       vendorId,
     };
-
-    await this.productRepo.findPaginated(
-      where,
-      { createdAt: 'DESC' },
-      page,
-      limit,
-    );
 
     if (name) {
       where.name = Like(`%${name}%`);
@@ -193,18 +182,16 @@ export class VendorService {
     return this.productRepo.findPaginated(
       where,
       { createdAt: 'DESC' },
-      page,
-      limit,
+      pagination?.page,
+      pagination?.limit,
     );
   }
 
   async vendorOrders(
     user: User,
-    pagination: PaginatorInput,
+    pagination?: PaginatorInput,
     status?: OrderStatus,
   ) {
-    const { page, limit } = pagination;
-
     const vendorId = user.vendorId as string;
 
     if (!vendorId) {
@@ -222,8 +209,8 @@ export class VendorService {
     return this.orderItemRepo.findPaginated(
       where,
       { createdAt: 'DESC' },
-      page,
-      limit,
+      pagination?.page,
+      pagination?.limit,
       {
         order: true,
         product: true,
@@ -233,10 +220,9 @@ export class VendorService {
 
   async vendorReviews(
     vendorId: string,
-    pagination: PaginatorInput,
+    pagination?: PaginatorInput,
     rating?: number,
   ) {
-    const { page, limit } = pagination;
     const where: FindOptionsWhere<Review> = {
       vendorId,
     };
@@ -248,8 +234,8 @@ export class VendorService {
     return this.reviewRepo.findPaginated(
       where,
       { createdAt: 'DESC' },
-      page,
-      limit,
+      pagination?.page,
+      pagination?.limit,
       {
         user: true,
       },

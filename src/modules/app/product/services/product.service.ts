@@ -91,41 +91,24 @@ export class ProductService {
     return product;
   }
 
-  async getUserFeed(user: User, pagination: PaginatorInput) {
-    const page = pagination.page || 1;
-    const limit = pagination.limit;
-
+  async getUserFeed(user: User, pagination?: PaginatorInput) {
     const follows = await this.followRepo.find({
       where: { followerId: user.id },
       select: ['vendorId'],
-
     });
 
     const followedVendorIds = follows.map((f) => f.vendorId);
 
-    if (followedVendorIds.length === 0) {
-      return {
-        items: [],
-        pageInfo: {
-          limit,
-          page,
-          hasPrevious: page > 1,
-          hasNext: false,
-          totalCount: 0,
-        },
-      };
-    }
-
     return this.productRepo.findPaginated(
       { vendorId: In(followedVendorIds) },
       { createdAt: 'DESC' },
-      page,
-      limit,
+      pagination?.page,
+      pagination?.limit,
       {
         images: true,
         // vendor: true,
         // category: true,
-      }
+      },
     );
   }
 
@@ -204,11 +187,8 @@ export class ProductService {
   async productImages(
     user: User,
     productId: string,
-    pagination: PaginatorInput,
+    pagination?: PaginatorInput,
   ) {
-    const page = pagination.page || 1;
-    const limit = pagination.limit || 10;
-
     const product = await this.productRepo.findOneOrFail(
       { where: { id: productId }, relations: ['images'] },
       ErrorCodeEnum.PRODUCT_DOES_NOT_EXIST,
@@ -220,24 +200,11 @@ export class ProductService {
       product.images?.map((img) => (typeof img === 'string' ? img : img.id)) ||
       [];
 
-    if (imageIds.length === 0) {
-      return {
-        items: [],
-        pageInfo: {
-          page,
-          limit,
-          totalCount: 0,
-          hasNext: false,
-          hasPrevious: false,
-        },
-      };
-    }
-
     return await this.fileRepo.findPaginated(
       { id: In(imageIds) },
       { createdAt: 'DESC' },
-      page,
-      limit,
+      pagination?.page,
+      pagination?.limit,
     );
   }
 

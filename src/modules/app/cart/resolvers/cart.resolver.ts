@@ -12,7 +12,7 @@ import { UpdateCartItemInput } from '../dto/inputs/update-cart-item-input';
 import { CartService } from '../services/cart.service';
 import { User } from '../../auth-base/user/entities/user.entity';
 import { Transactional } from 'typeorm-transactional';
-import { NullablePaginatorArgsInput, PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
+import { NullablePaginatorArgsInput } from 'src/common/dtos/inputs/paginator.input';
 import { CartItemPaginated } from '../dto/responses/cart-item-paginated.response';
 @Resolver(() => Cart)
 export class CartResolver {

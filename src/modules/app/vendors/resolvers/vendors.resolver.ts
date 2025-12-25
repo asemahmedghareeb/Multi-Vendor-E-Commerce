@@ -12,7 +12,7 @@ import { VendorPermissionActionsEnum } from '../enums/vendor-permission.enum';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { User } from '../../auth-base/user/entities/user.entity';
-import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
+import { NullablePaginatorArgsInput } from 'src/common/dtos/inputs/paginator.input';
 import { PaginatedVendors } from '../dtos/responses/paginatedVendors';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { RequestVendorInput } from '../dtos/inputs/request-vendor.input';
@@ -35,10 +35,10 @@ export class VendorsResolver {
   @Auth()
   @Query(() => PaginatedVendors)
   async vendors(
-    @Args('pagination', { nullable: true })
-    pagination: PaginatorInput,
+    @Args( { nullable: true })
+    pagination: NullablePaginatorArgsInput,
   ) {
-    return this.vendorService.findAll(pagination);
+    return this.vendorService.findAll(pagination.paginate);
   }
 
   @Auth({
@@ -87,9 +87,9 @@ export class VendorsResolver {
   async vendorProducts(
     @Args('vendorId', ParseUUIDPipe) vendorId: string,
     @Args('name', { nullable: true }) name: string,
-    @Args('pagination') pagination: PaginatorInput,
+    @Args({nullable: true}) pagination: NullablePaginatorArgsInput,
   ) {
-    return this.vendorService.vendorProducts(vendorId, pagination, name);
+    return this.vendorService.vendorProducts(vendorId, pagination.paginate, name);
   }
 
   @Auth({
@@ -98,14 +98,14 @@ export class VendorsResolver {
   @Query(() => PaginatedVendorOrders)
   async vendorOrders(
     @CurrentUser() user: User,
-    @Args('pagination', { nullable: true }) pagination: PaginatorInput,
+    @Args( { nullable: true }) pagination: NullablePaginatorArgsInput,
     @Args('status', {
       nullable: true,
       type: () => OrderStatus,
     })
     status?: OrderStatus,
   ) {
-    return this.vendorService.vendorOrders(user, pagination, status);
+    return this.vendorService.vendorOrders(user, pagination.paginate, status);
   }
  
   @Auth()
@@ -113,9 +113,9 @@ export class VendorsResolver {
   async vendorReviews(
     @Args('vendorId', { type: () => String }) vendorId: string,
     @Args('rating', { nullable: true }) rating: number,
-    @Args('pagination') pagination: PaginatorInput,
+    @Args({ nullable: true }) pagination: NullablePaginatorArgsInput,
   ) {
-    return this.vendorService.vendorReviews(vendorId, pagination, rating);
+    return this.vendorService.vendorReviews(vendorId, pagination.paginate, rating);
   }
   @ResolveField(() => User)
   async user(@Parent() vendor: Vendor) {

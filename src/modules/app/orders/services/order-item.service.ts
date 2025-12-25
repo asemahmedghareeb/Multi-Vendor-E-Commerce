@@ -26,21 +26,19 @@ export class OrderItemService {
     private readonly orderTrackingRepo: AppRepository<OrderTracking>,
     private readonly notificationService: NotificationService,
   ) {}
-  async getVendorOrderedItems(userId: string, pagination: PaginatorInput) {
+  async getVendorOrderedItems(userId: string, pagination?: PaginatorInput) {
     const vendor = await this.vendorRepo.findOneOrFail({
       where: { id: userId },
     });
-    const page = pagination.page;
-    const limit = pagination.limit;
     return this.orderItemRepo.findPaginated(
       { vendorId: vendor.id },
       { createdAt: 'DESC' },
-      page,
-      limit,
+      pagination?.page,
+      pagination?.limit,
     );
   }
 
-  //TODO: get order items query and make it paginated (because the order may have many items)  
+  //TODO: get order items query and make it paginated (because the order may have many items)
   async updateOrderItemStatus(
     user: User,
     itemId: string,
