@@ -15,9 +15,7 @@ import { NotificationTargetEnum } from '../../notification/enums/notification-ta
 import { NotificationTypeEnum } from '../../notification/enums/notification-type.enum';
 import { Product } from '../../product/entities/product.entity';
 import { Review } from '../../reviews/entities/review.entity';
-import { VendorProductsInput } from '../dtos/inputs/vendor-products.input';
-import { VendorOrdersInput } from '../dtos/inputs/vendor-orders.input';
-import { VendorReviewsInput } from '../dtos/inputs/vendor-reviews.input';
+
 import { FindOptionsWhere, Like } from 'typeorm';
 import { OrderItem } from '../../orders/entities/order-item.entity';
 import { OrderStatus } from '../../orders/enum/order-status.enum';
@@ -54,7 +52,7 @@ export class VendorService {
     );
   }
 
-  async requestVendorStatus(
+  async vendorRequest(
     userId: string,
     input: RequestVendorInput,
   ): Promise<Vendor> {
@@ -96,8 +94,10 @@ export class VendorService {
 
     const userEmail = vendor.user.email as string;
     if (status === VendorStatus.VERIFIED) {
+      console.log(vendor.status);
       vendor.user.role = UserRoleEnum.VENDOR;
       await this.userRepo.save(vendor.user);
+      await this.vendorRepo.save(vendor);
 
       this.mailService.sendEmailWithATemplate(
         userEmail,
@@ -124,6 +124,7 @@ export class VendorService {
       await this.notificationService.SendNotification(notificationInput);
     }
     if (status === VendorStatus.REJECTED) {
+      this.vendorRepo.remove(vendor);
       this.mailService.sendEmailWithATemplate(
         userEmail,
         MailSubjectEnum.VENDOR_REJECTION,
@@ -160,19 +161,21 @@ export class VendorService {
     });
   }
 
-  async vendorProducts(vendorId: string, pagination: VendorProductsInput) {
-    const { name, limit, page } = pagination;
+  async vendorProducts(
+    vendorId: string,
+    pagination: PaginatorInput,
+    name?: string,
+  ) {
+    const { limit, page } = pagination;
     const where: FindOptionsWhere<Product> = {
       vendorId,
     };
 
-    console.log(
-      await this.productRepo.findPaginated(
-        where,
-        { createdAt: 'DESC' },
-        page,
-        limit,
-      ),
+    await this.productRepo.findPaginated(
+      where,
+      { createdAt: 'DESC' },
+      page,
+      limit,
     );
 
     if (name) {
@@ -187,8 +190,18 @@ export class VendorService {
     );
   }
 
-  async vendorOrders(vendorId: string, pagination: VendorOrdersInput) {
-    const { page, limit, status } = pagination;
+  async vendorOrders(
+    user: User,
+    pagination: PaginatorInput,
+    status?: OrderStatus,
+  ) {
+    const { page, limit } = pagination;
+
+    const vendorId = user.vendorId as string;
+
+    if (!vendorId) {
+      throw new AppHttpException(ErrorCodeEnum.FORBIDDEN);
+    }
 
     const where: FindOptionsWhere<OrderItem> = {
       vendorId,
@@ -210,8 +223,12 @@ export class VendorService {
     );
   }
 
-  async vendorReviews(vendorId: string, pagination: VendorReviewsInput) {
-    const { page, limit, rating } = pagination;
+  async vendorReviews(
+    vendorId: string,
+    pagination: PaginatorInput,
+    rating?: number,
+  ) {
+    const { page, limit } = pagination;
     const where: FindOptionsWhere<Review> = {
       vendorId,
     };

@@ -35,7 +35,7 @@ export class OrdersService {
     private readonly paymentService: PaymentService,
   ) {}
 
-  async findAllOrders(pagination: PaginatorInput) {
+  async findAllOrders(pagination?: PaginatorInput) {
     const page = pagination?.page || 1;
     const limit = pagination?.limit || 10;
 
@@ -56,7 +56,7 @@ export class OrdersService {
 
   async createOrder(user: User, input: CreateOrderInput): Promise<Order> {
     const cart = await this.cartRepo.findOneOrFail({
-      where: { user_Id: user.id },
+      where: { userId: user.id },
       relations: ['items', 'user', 'items.product', 'items.product.vendor'],
       order: { items: { createdAt: 'ASC' } },
     });
@@ -66,7 +66,7 @@ export class OrdersService {
     }
 
     const sortedCartItems = cart.items.sort((a, b) =>
-      a.product_id.localeCompare(b.product_id),
+      a.productId.localeCompare(b.productId),
     );
 
     let totalAmount = 0;
@@ -74,7 +74,7 @@ export class OrdersService {
 
     for (const item of sortedCartItems) {
       const product = await this.productRepo.findOneOrFail({
-        where: { id: item.product_id },
+        where: { id: item.productId },
         // lock: { mode: 'pessimistic_write' },
         relations: ['vendor'],
       });
@@ -144,15 +144,14 @@ export class OrdersService {
     return savedOrder;
   }
 
-  async getMyOrders(userId: string, pagination: PaginatorInput) {
+  async getMyOrders(userId: string, pagination?: PaginatorInput) {
     await this.userRepo.findOneOrFail({ where: { id: userId } });
-    const page = pagination.page;
-    const limit = pagination.limit;
+
     return this.orderRepo.findPaginated(
       { user: { id: userId } },
       { createdAt: 'DESC' },
-      page,
-      limit,
+      pagination?.page,
+      pagination?.limit
     );
   }
 

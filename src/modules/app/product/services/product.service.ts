@@ -79,7 +79,7 @@ export class ProductService {
 
     const product = this.productRepo.create({
       ...productData,
-      price: Math.round(input.price * 100),
+      price: Math.round(input.price),
       vendor: vendor,
       category: category,
       vendorId: vendor.id,
@@ -98,6 +98,7 @@ export class ProductService {
     const follows = await this.followRepo.find({
       where: { followerId: user.id },
       select: ['vendorId'],
+
     });
 
     const followedVendorIds = follows.map((f) => f.vendorId);
@@ -120,10 +121,11 @@ export class ProductService {
       { createdAt: 'DESC' },
       page,
       limit,
-      // {
-      //   vendor: true,
-      //   category: true,
-      // }
+      {
+        images: true,
+        // vendor: true,
+        // category: true,
+      }
     );
   }
 

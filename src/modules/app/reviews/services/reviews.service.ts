@@ -35,7 +35,7 @@ export class ReviewsService {
     });
   }
   async create(userId: string, input: CreateReviewInput): Promise<Review> {
-    this.reviewRepo.findOneAndFail({
+    await this.reviewRepo.findOneAndFail({
       where: {
         userId,
         vendorId: input.vendorId,
@@ -45,14 +45,12 @@ export class ReviewsService {
 
     const order = await this.orderRepo.findOneOrFail({
       where: { id: input.orderId },
-      relations: ['items', 'user'],
+      relations: ['items'],
     });
 
-    // if (order.user.id !== userId)
-    //   throw new AppHttpException(ErrorCodeEnum.FORBIDDEN);
-
-    if (order.user.id !== userId && order.status !== OrderStatus.DELIVERED)
+    if (order.userId !== userId || order.status !== OrderStatus.DELIVERED) {
       throw new AppHttpException(ErrorCodeEnum.FORBIDDEN);
+    }
 
     const hasBoughtFromVendor = order.items.some(
       (item) =>
@@ -61,7 +59,7 @@ export class ReviewsService {
     );
 
     if (!hasBoughtFromVendor) {
-      throw new AppHttpException(ErrorCodeEnum.FORBIDDEN);
+      throw new AppHttpException(ErrorCodeEnum.BAD_REQUEST_EXCEPTION);
     }
 
     const review = this.reviewRepo.create({

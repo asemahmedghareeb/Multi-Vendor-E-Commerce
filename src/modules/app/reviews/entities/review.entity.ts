@@ -5,7 +5,6 @@ import {
   ManyToOne,
   JoinColumn,
   Unique,
-  RelationId,
 } from 'typeorm';
 
 import { Order } from '../../orders/entities/order.entity';
@@ -33,7 +32,7 @@ export class Review extends AppBaseEntity {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @RelationId((review: Review) => review.user)
+  @Column()
   userId: string;
 
   @Field(() => Vendor)

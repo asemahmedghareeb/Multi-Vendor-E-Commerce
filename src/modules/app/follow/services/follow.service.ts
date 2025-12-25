@@ -37,8 +37,8 @@ export class FollowsService {
     if (existing) return true;
 
     const follow = this.followRepo.create({
-      follower: { id: followerId },
-      vendor: { id: vendorId },
+      vendor,
+      follower: user,
     });
 
     await this.followRepo.save(follow);
@@ -61,9 +61,14 @@ export class FollowsService {
   }
 
   async getMyFollowers(user: User, pagination: PaginatorInput) {
+    const vendor = await this.vendorRepo.findOneOrFail({
+      where: {
+        userId: user.id,
+      },
+    });
     const { page, limit } = pagination;
-    return await this.followRepo.findPaginated(
-      { followerId: user.id },
+    const followers = await this.followRepo.findPaginated(
+      { vendorId: vendor.id },
       { createdAt: 'DESC' },
       page,
       limit,
@@ -72,5 +77,8 @@ export class FollowsService {
         vendor: true,
       },
     );
+
+    console.log(followers);
+    return followers;
   }
 }

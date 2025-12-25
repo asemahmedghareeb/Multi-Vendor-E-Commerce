@@ -12,7 +12,7 @@ import { UpdateCartItemInput } from '../dto/inputs/update-cart-item-input';
 import { CartService } from '../services/cart.service';
 import { User } from '../../auth-base/user/entities/user.entity';
 import { Transactional } from 'typeorm-transactional';
-import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
+import { NullablePaginatorArgsInput, PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
 import { CartItemPaginated } from '../dto/responses/cart-item-paginated.response';
 @Resolver(() => Cart)
 export class CartResolver {
@@ -22,14 +22,14 @@ export class CartResolver {
   @Query(() => CartItemPaginated)
   async myCart(
     @CurrentUser() user: User,
-    @Args('pagination', { nullable: true }) pagination: PaginatorInput,
+    @Args({ nullable: true }) paginationInput: NullablePaginatorArgsInput,
   ) {
-    return this.cartService.getCart(user, pagination);
+    return this.cartService.getCart(user, paginationInput?.paginate);
   }
 
   @Query(() => Cart)
   async Cart(@CurrentUser() user: User) {
-    return this.cartService.getCartForUser(user.id);
+    return this.cartService.getCartForUser(user);
   }
 
   @Auth()
@@ -43,7 +43,7 @@ export class CartResolver {
   }
 
   @Auth()
-  @Mutation(() => Cart)
+  @Mutation(() => Boolean)
   @Transactional()
   async updateCartItem(
     @Args('input') input: UpdateCartItemInput,
@@ -53,7 +53,7 @@ export class CartResolver {
   }
 
   @Auth()
-  @Mutation(() => Cart)
+  @Mutation(() => Boolean)
   @Transactional()
   async removeFromCart(
     @Args('cartItemId') cartItemId: string,

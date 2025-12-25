@@ -6,7 +6,6 @@ import {
   ResolveField,
   Parent,
 } from '@nestjs/graphql';
-
 import { CategoriesService } from '../services/categories.service';
 import { Category } from '../entities/category.entity';
 import { CreateCategoryInput } from '../dto/inputs/create-category.input';

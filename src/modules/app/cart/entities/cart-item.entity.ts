@@ -16,17 +16,17 @@ export class CartItem extends AppBaseEntity {
 
   @Field(() => Cart)
   @ManyToOne(() => Cart, (cart) => cart.items, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'cart_id' })
+  @JoinColumn({ name: 'cartId' })
   cart: Cart;
 
   @Column()
-  cart_id: string;
+  cartId: string;
 
   @Field(() => Product)
   @ManyToOne(() => Product, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'product_id' })
+  @JoinColumn({ name: 'productId' })
   product: Product;
 
   @Column()
-  product_id: string;
+  productId: string;
 }

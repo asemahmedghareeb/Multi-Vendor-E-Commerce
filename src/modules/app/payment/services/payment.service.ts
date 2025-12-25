@@ -77,6 +77,7 @@ export class PaymentService {
     const paymentStrategy =
       this.moduleRef.get<PaymentStrategy>(paymentStrategyClass);
     const paymentInfo = await paymentStrategy.handlePaymentWebhook(req);
+    console.log(paymentInfo);
     if (!paymentInfo)
       throw new AppHttpException(ErrorCodeEnum.SERVER_SIDE_ERROR);
 

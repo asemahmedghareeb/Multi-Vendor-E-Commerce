@@ -1,10 +1,9 @@
-import { ObjectType, Field, Float } from '@nestjs/graphql';
+import { ObjectType, Field } from '@nestjs/graphql';
 import {
   Entity,
   OneToOne,
   JoinColumn,
   OneToMany,
-  RelationId,
   Column,
 } from 'typeorm';
 
@@ -22,11 +21,11 @@ import { MoneyScalar } from 'src/common/scalars/money.scalar';
 export class Cart extends AppBaseEntity {
   @Field(() => User)
   @OneToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'userId' })
   user: User;
 
-  @RelationId((cart: Cart) => cart.user)
-  user_Id: string;
+  @Column()
+  userId: string;
 
   @Field(() => [CartItem])
   @OneToMany(() => CartItem, (item) => item.cart, { cascade: true })

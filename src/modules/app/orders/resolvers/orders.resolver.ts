@@ -7,14 +7,16 @@ import {
   Parent,
 } from '@nestjs/graphql';
 import { Order } from '../entities/order.entity';
-import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
+import {
+  NullablePaginatorArgsInput,
+  PaginatorInput,
+} from 'src/common/dtos/inputs/paginator.input';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
 import { Payment } from 'src/modules/app/payment/entities/payment.entity';
 import { OrdersPaginated } from '../dto/responses/paginated-orders';
 import { User } from '../../auth-base/user/entities/user.entity';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { OrderItem } from '../entities/order-item.entity';
 import { CreateOrderInput } from '../dto/inputs/create-order.input';
 import { OrdersService } from '../services/orders.service';
 import { DefaultPermissionActionsEnum } from 'src/common/enums/default-permissions.enum';
@@ -44,10 +46,10 @@ export class OrdersResolver {
     ],
   })
   async orders(
-    @Args('pagination', { nullable: true })
-    pagination: PaginatorInput,
+    @Args({ nullable: true })
+    pagination: NullablePaginatorArgsInput,
   ) {
-    return this.ordersService.findAllOrders(pagination);
+    return this.ordersService.findAllOrders(pagination.paginate);
   }
 
   @Auth()
@@ -81,13 +83,12 @@ export class OrdersResolver {
   @Query(() => OrdersPaginated)
   async myOrders(
     @CurrentUser() user: User,
-    @Args('pagination') pagination: PaginatorInput,
+    @Args({nullable: true}) pagination: NullablePaginatorArgsInput,
   ) {
-    return this.ordersService.getMyOrders(user.id, pagination);
+    return this.ordersService.getMyOrders(user.id, pagination.paginate);
   }
 
   @Auth({
-    roles: [UserRoleEnum.ADMIN, UserRoleEnum.VENDOR],
     permissions: [
       {
         action: DefaultPermissionActionsEnum.READ,
@@ -95,8 +96,8 @@ export class OrdersResolver {
       },
     ],
   })
-  @Query(() => Order, { name: 'order' })
-  async getOrder(@Args('id') id: string, @CurrentUser() user: User) {
+  @Query(() => Order)
+  async order(@Args('id') id: string, @CurrentUser() user: User) {
     return this.ordersService.getOrder(id, user);
   }
 

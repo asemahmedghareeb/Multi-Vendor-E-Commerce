@@ -10,7 +10,6 @@ import { AppRepository } from 'src/modules/core/app-database/repositories/app.re
 import { ErrorCodeEnum } from 'src/common/enums/error-code.enum';
 import { AppHttpException } from 'src/common/exceptions/app-http.exception';
 import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
-import { FindOptionsRelations } from 'typeorm';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { instanceToPlain } from 'class-transformer';
@@ -31,7 +30,8 @@ export class CartService {
     return `cart:${userId}`;
   }
 
-  async getCartForUser(userId: string): Promise<Cart> {
+  async getCartForUser(user: User): Promise<Cart> {
+    const userId = user.id;
     const cacheKey = this.getCartCacheKey(userId);
 
     const cachedData = await this.cacheManager.get<string>(cacheKey);
@@ -42,7 +42,7 @@ export class CartService {
 
     // 2. Fetch from DB if miss
     let cart = await this.cartRepo.findOne({
-      where: { user_Id: userId },
+      where: { userId: userId },
       relations: ['items', 'items.product', 'items.product.vendor'],
     });
 
@@ -59,9 +59,8 @@ export class CartService {
   }
 
   async getCart(user: User, pagination?: PaginatorInput) {
-    const { page = 1, limit = 15 } = pagination || {};
     let cart = await this.cartRepo.findOne({
-      where: { user_Id: user.id},
+      where: { userId: user.id },
       order: { items: { createdAt: 'ASC' } },
       relations: ['items'],
     });
@@ -71,9 +70,13 @@ export class CartService {
     return this.cartItemRepo.findPaginated(
       { cart: { id: cart.id } },
       { createdAt: 'DESC' },
-      page,
-      limit,
-      ['product', 'product.vendor'] as FindOptionsRelations<CartItem>,
+      pagination?.page,
+      pagination?.limit,
+      {
+        product: {
+          vendor: true,
+        },
+      },
     );
   }
 
@@ -89,7 +92,7 @@ export class CartService {
   async addToCart(user: User, input: AddToCartInput): Promise<Cart> {
     const userId = user.id;
     let cart = await this.cartRepo.findOne({
-      where: { user_Id: userId },
+      where: { userId: userId },
       relations: ['items', 'items.product'],
     });
 
@@ -157,7 +160,7 @@ export class CartService {
   ): Promise<boolean> {
     const userId = user.id;
     const cart = await this.cartRepo.findOneOrFail({
-      where: { user_Id: userId },
+      where: { userId: userId },
       relations: ['items', 'items.product'],
     });
 
@@ -177,20 +180,24 @@ export class CartService {
     return true;
   }
 
+
+
   async removeFromCart(user: User, cartItemId: string): Promise<boolean> {
     const cart = await this.cartRepo.findOneOrFail({
-      where: { user_Id: user.id},
+      where: { userId: user.id },
       relations: ['items', 'items.product'],
     });
-
     const cartItem = cart.items.find((item) => item.id === cartItemId);
     if (!cartItem) {
       throw new AppHttpException(ErrorCodeEnum.NOT_FOUND);
     }
+
+    await this.cartItemRepo.delete({ id: cartItemId });
     cart.items = cart.items.filter((item) => item.id !== cartItemId);
     cart.totalAmount = cart.items.reduce((sum, item) => {
       return sum + item.quantity * item.product.price;
     }, 0);
+
     await this.cartRepo.save(cart);
     await this.cacheManager.del(this.getCartCacheKey(user.id));
 

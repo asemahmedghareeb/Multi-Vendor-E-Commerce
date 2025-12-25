@@ -14,19 +14,16 @@ import { Auth } from 'src/common/decorators/auth.decorator';
 import { User } from '../../auth-base/user/entities/user.entity';
 import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
 import { PaginatedVendors } from '../dtos/responses/paginatedVendors';
-import { VendorStatus } from '../enums/vendor-status.enum';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { RequestVendorInput } from '../dtos/inputs/request-vendor.input';
 import { Transactional } from 'typeorm-transactional';
 import { UserDataloader } from '../../auth-base/session/dataloaders/user.dataloader';
 import { PaginatedVendorProducts } from '../dtos/responses/paginated-vendor-products.type';
-import { VendorProductsInput } from '../dtos/inputs/vendor-products.input';
 import { PaginatedVendorOrders } from '../dtos/responses/paginated-vendor-orders.type';
-import { VendorOrdersInput } from '../dtos/inputs/vendor-orders.input';
 import { PaginatedVendorReviews } from '../dtos/responses/paginated-vendor-reviews.type';
-import { VendorReviewsInput } from '../dtos/inputs/vendor-reviews.input';
 import { ParseUUIDPipe } from '@nestjs/common';
-import { parse } from 'path';
+import { ApproveOrRejectVendorInput } from '../dtos/inputs/approveOrReject.input';
+import { OrderStatus } from '../../orders/enum/order-status.enum';
 
 @Resolver(() => Vendor)
 export class VendorsResolver {
@@ -41,7 +38,7 @@ export class VendorsResolver {
     @Args('pagination', { nullable: true })
     pagination: PaginatorInput,
   ) {
-    return this.vendorService.findAll(pagination || { page: 1, limit: 10 });
+    return this.vendorService.findAll(pagination);
   }
 
   @Auth({
@@ -54,9 +51,11 @@ export class VendorsResolver {
     ],
   })
   @Transactional()
-  @Mutation(() => Vendor)
-  async approveVendor(@Args('userId', ParseUUIDPipe) userId: string) {
-    return this.vendorService.updateVendorStatus(userId, VendorStatus.VERIFIED);
+  @Mutation(() => Boolean)
+  async approveOrRejectVendor(
+    @Args('input') input: ApproveOrRejectVendorInput,
+  ) {
+    return this.vendorService.updateVendorStatus(input.id, input.status);
   }
 
   @Auth({
@@ -64,15 +63,6 @@ export class VendorsResolver {
     permissions: [
       {
         action: VendorPermissionActionsEnum.APPROVE,
-        target: Vendor.permissionsTarget,
-      },
-    ],
-  })
-  @Auth({
-    roles: [UserRoleEnum.ADMIN],
-    permissions: [
-      {
-        action: VendorPermissionActionsEnum.READ,
         target: Vendor.permissionsTarget,
       },
     ],
@@ -85,38 +75,47 @@ export class VendorsResolver {
   @Auth()
   @Mutation(() => Vendor)
   @Transactional()
-  async requestVendorStatus(
+  async vendorRequest(
     @CurrentUser() user: User,
     @Args('input') input: RequestVendorInput,
   ) {
-    return this.vendorService.requestVendorStatus(user.id, input);
+    return this.vendorService.vendorRequest(user.id, input);
   }
 
   @Auth()
   @Query(() => PaginatedVendorProducts)
   async vendorProducts(
     @Args('vendorId', ParseUUIDPipe) vendorId: string,
-    @Args('pagination') pagination: VendorProductsInput,
+    @Args('name', { nullable: true }) name: string,
+    @Args('pagination') pagination: PaginatorInput,
   ) {
-    return this.vendorService.vendorProducts(vendorId, pagination);
+    return this.vendorService.vendorProducts(vendorId, pagination, name);
   }
 
-  @Auth({ roles: [UserRoleEnum.ADMIN] })
+  @Auth({
+    roles: [UserRoleEnum.VENDOR],
+  })
   @Query(() => PaginatedVendorOrders)
   async vendorOrders(
-    @Args('vendorId', ParseUUIDPipe) vendorId: string,
-    @Args('pagination', { nullable: true }) pagination: VendorOrdersInput,
+    @CurrentUser() user: User,
+    @Args('pagination', { nullable: true }) pagination: PaginatorInput,
+    @Args('status', {
+      nullable: true,
+      type: () => OrderStatus,
+    })
+    status?: OrderStatus,
   ) {
-    return this.vendorService.vendorOrders(vendorId, pagination);
+    return this.vendorService.vendorOrders(user, pagination, status);
   }
-
+ 
   @Auth()
   @Query(() => PaginatedVendorReviews)
   async vendorReviews(
     @Args('vendorId', { type: () => String }) vendorId: string,
-    @Args('pagination') pagination: VendorReviewsInput,
+    @Args('rating', { nullable: true }) rating: number,
+    @Args('pagination') pagination: PaginatorInput,
   ) {
-    return this.vendorService.vendorReviews(vendorId, pagination);
+    return this.vendorService.vendorReviews(vendorId, pagination, rating);
   }
   @ResolveField(() => User)
   async user(@Parent() vendor: Vendor) {

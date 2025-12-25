@@ -13,6 +13,7 @@ import { User } from '../../auth-base/user/entities/user.entity';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { PaginatorInput } from 'src/common/dtos/inputs/paginator.input';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
+import { FollowersPaginated } from '../dto/paginated-follow.type';
 // import { UserDataloader } from '../auth-base/session/dataloaders/user.dataloader';
 
 @Resolver(() => Follow)
@@ -26,9 +27,9 @@ export class FollowsResolver {
   @Mutation(() => Boolean)
   async followVendor(
     @Args('vendorId') vendorId: string,
-    @CurrentUser() user: { userId: string },
+    @CurrentUser() user: User,
   ) {
-    return this.followsService.follow(user.userId, vendorId);
+    return this.followsService.follow(user.id, vendorId);
   }
 
   @Auth()
@@ -43,7 +44,7 @@ export class FollowsResolver {
   @Auth({
     roles: [UserRoleEnum.VENDOR],
   })
-  @Query(() => [Follow])
+  @Query(() => FollowersPaginated)
   async myFollowers(
     @Args('pagination') pagination: PaginatorInput,
     @CurrentUser() user: User,

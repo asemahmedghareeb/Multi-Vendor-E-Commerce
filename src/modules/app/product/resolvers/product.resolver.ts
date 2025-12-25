@@ -44,35 +44,23 @@ export class ProductsResolver {
     private readonly fileRepository: AppRepository<File>,
   ) {}
 
-  @Auth({
-    roles: [UserRoleEnum.VENDOR],
-  })
-  @Mutation(() => PresignedUrlPayload)
-  @Transactional()
-  async generateProductImageUploadUrl(
-    @Args('input') input: GeneratePresignedUrlInput,
-  ): Promise<PresignedUrlPayload> {
-    const { presignedUrl, file } =
-      await this.presignedUrlService.getUploadPresignedUrl({
-        ...input,
-        fileUseCase: FileUseCaseEnum.PRODUCT_IMAGE,
-      });
-
-    return { presignedUrl, fileId: file.id };
-  }
-
   // @Auth({
   //   roles: [UserRoleEnum.VENDOR],
   // })
-  // @Mutation(() => Product)
+  // @Mutation(() => PresignedUrlPayload)
   // @Transactional()
-  // async assignProductImage(
-  //   @Args('productId', { type: () => ID }) productId: string,
-  //   @Args('fileId', { type: () => ID }) fileId: string,
-  //   @CurrentUser() user: User,
-  // ) {
-  //   return this.productService.assignImage(user, productId, fileId);
+  // async generateProductImageUploadUrl(
+  //   @Args('input') input: GeneratePresignedUrlInput,
+  // ): Promise<PresignedUrlPayload> {
+  //   const { presignedUrl, file } =
+  //     await this.presignedUrlService.getUploadPresignedUrl({
+  //       ...input,
+  //       fileUseCase: FileUseCaseEnum.PRODUCT_IMAGE,
+  //     });
+
+  //   return { presignedUrl, fileId: file.id };
   // }
+
 
   @Auth({
     roles: [UserRoleEnum.ADMIN, UserRoleEnum.VENDOR],
