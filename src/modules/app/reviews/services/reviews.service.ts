@@ -71,9 +71,7 @@ export class ReviewsService {
     });
 
     const savedReview = await this.reviewRepo.save(review);
-
     await this.updateVendorStats(savedReview.vendorId);
-
     return savedReview;
   }
 
