@@ -1,5 +1,5 @@
 import { ArgsType, Field, InputType, Int } from '@nestjs/graphql';
-import { IsOptional, Min, ValidateNested } from 'class-validator';
+import { IsOptional, Max, Min, ValidateNested } from 'class-validator';
 
 @InputType()
 export class PaginatorInput {
@@ -8,6 +8,7 @@ export class PaginatorInput {
   page?: number;
 
   @Min(1)
+  @Max(50)
   @Field(() => Int, { defaultValue: 15 })
   limit?: number;
 }
