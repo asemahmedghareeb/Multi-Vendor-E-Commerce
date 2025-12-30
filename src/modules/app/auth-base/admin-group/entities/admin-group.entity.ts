@@ -1,5 +1,5 @@
 import { AppBaseEntity } from 'src/modules/core/app-database/entities/app-base.entity';
-import { Column, Entity, Index, OneToMany, Unique } from 'typeorm';
+import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { AdminGroupPermission } from './admin-group-permission.entity';
 import { User } from '../../user/entities/user.entity';
 import { AdminGroupScopeEnum } from 'src/common/enums/admin-group-scope.enum';

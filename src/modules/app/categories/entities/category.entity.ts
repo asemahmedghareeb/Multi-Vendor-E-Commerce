@@ -28,7 +28,6 @@ export class Category extends AppBaseEntity {
   @Column({ nullable: true })
   parentId: string;
 
-  @Field(() => [Category], { nullable: true })
   @OneToMany(() => Category, (category) => category.parent, { nullable: true , cascade: true})
   children: Category[];
 

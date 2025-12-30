@@ -27,7 +27,6 @@ export class Cart extends AppBaseEntity {
   @Column()
   userId: string;
 
-  @Field(() => [CartItem])
   @OneToMany(() => CartItem, (item) => item.cart, { cascade: true })
   items: CartItem[];
 

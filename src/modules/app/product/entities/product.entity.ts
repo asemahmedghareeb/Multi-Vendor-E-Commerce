@@ -30,10 +30,6 @@ export class Product extends AppBaseEntity {
   @Field(() => MoneyScalar)
   @Column({
     type: 'bigint',
-    // transformer: {
-    //   to: (value: number) => value,
-    //   from: (value: string) => parseInt(value, 10),
-    // },
   })
   price: number;
 
@@ -41,14 +37,13 @@ export class Product extends AppBaseEntity {
   @Column({ type: 'int', default: 0 })
   inventoryCount: number;
 
-  @Field(() => [File], { nullable: true, defaultValue: [] })
   @OneToMany(() => File, (file) => file.product, {
     cascade: true,
   })
   images?: File[];
 
   @Field(() => Vendor)
-  @ManyToOne(() => Vendor, (vendor) => vendor.products)
+  @ManyToOne(() => Vendor, (vendor) => vendor.products, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'vendorId' })
   vendor: Vendor;
 

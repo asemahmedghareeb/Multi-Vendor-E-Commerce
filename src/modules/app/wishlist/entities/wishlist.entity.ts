@@ -18,7 +18,6 @@ export class Wishlist extends AppBaseEntity {
   @Column()
   userId: string;
 
-  @Field(() => [WishlistItem])
   @OneToMany(() => WishlistItem, (item) => item.wishlist, { cascade: true })
   items: WishlistItem[];
 }

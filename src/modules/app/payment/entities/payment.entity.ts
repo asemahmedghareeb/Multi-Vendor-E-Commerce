@@ -76,7 +76,6 @@ export class Payment extends AppBaseEntity {
   @Column({ nullable: true })
   orderId?: string;
 
-  @Field(() => [Refund], { nullable: true })
   @OneToMany(() => Refund, (refund) => refund.payment)
   refunds: Refund[];
 }

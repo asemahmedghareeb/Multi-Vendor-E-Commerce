@@ -59,7 +59,6 @@ export class OrderItem extends AppBaseEntity {
   @Column({ type: 'int', default: 0 })
   refundedQuantity: number;
 
-  @Field(() => [OrderTracking], { nullable: true })
   @OneToMany(() => OrderTracking, (tracking) => tracking.orderItem)
   trackingHistory: OrderTracking[];
 }

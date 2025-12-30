@@ -62,18 +62,16 @@ export class Vendor extends AppBaseEntity {
   @Column()
   userId: string;
 
-  @OneToMany(() => Product, (product) => product.vendor)
+  @OneToMany(() => Product, (product) => product.vendor,)
   products: Product[];
 
-  @Field(() => [OrderItem])
+
   @OneToMany(() => OrderItem, (orderItem) => orderItem.vendor)
   orders: OrderItem[];
 
-  @Field(() => [Review])
   @OneToMany(() => Review, (review) => review.vendor)
   reviews: Review[];
 
-  @Field(() => [Follow])
   @OneToMany(() => Follow, (Follow) => Follow.vendor)
   followers: Follow[];
 }
