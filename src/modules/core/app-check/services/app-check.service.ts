@@ -1,4 +1,4 @@
-import { Global, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as fireBaseAdmin from 'firebase-admin';
 import { ConfigService } from '@nestjs/config';
 import { AppHttpException } from 'src/common/exceptions/app-http.exception';

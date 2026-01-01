@@ -20,16 +20,17 @@ import { VendorDataloader } from '../dataloaders/vendor.dataloader';
 import { CreateProductInput } from '../dto/inputs/create-product.input';
 import { GetProductsFilterInput } from '../dto/inputs/pagination.input';
 import { UpdateProductInput } from '../dto/inputs/Update-product-Input';
-import { ProductPaginated } from '../dto/responses/paginated-products';
+import {
+  ProductCursorPaginated,
+  ProductPaginated,
+} from '../dto/responses/paginated-products';
+import { GetProductsCursorFilterInput } from '../dto/inputs/cursor-pagination.input';
 import { Product } from '../entities/product.entity';
 import { ProductService } from '../services/product.service';
 import { PresignedUrlService } from 'src/modules/core/media/services/presigned-url.service';
-import { GeneratePresignedUrlInput } from 'src/modules/core/media/dtos/inputs/generate-presigned-url.input';
-import { FileUseCaseEnum } from 'src/modules/core/media/enums/file-use-case.enum';
 import { InjectAppRepository } from 'src/common/decorators/inject-app-repository.decorator';
 import { AppRepository } from 'src/modules/core/app-database/repositories/app.repository';
 import { File } from 'src/modules/core/media/entities/file.entity';
-import { PresignedUrlPayload } from '../dto/responses/presigned-url-payload';
 import { ParseUUIDPipe } from '@nestjs/common';
 import { FilesPaginated } from 'src/modules/core/media/dtos/responses/file-paginated.responese';
 
@@ -39,12 +40,7 @@ export class ProductsResolver {
     private readonly productService: ProductService,
     private readonly vendorDataLoader: VendorDataloader,
     private readonly categoryLoader: CategoryLoader,
-    private readonly presignedUrlService: PresignedUrlService,
-    @InjectAppRepository(File)
-    private readonly fileRepository: AppRepository<File>,
   ) {}
-
-
 
   @Auth({
     roles: [UserRoleEnum.ADMIN, UserRoleEnum.VENDOR],
@@ -80,6 +76,14 @@ export class ProductsResolver {
     @Args('pagination', { nullable: true }) filter: GetProductsFilterInput,
   ) {
     return this.productService.findAll(filter);
+  }
+
+  @Query(() => ProductCursorPaginated)
+  async productsCursor(
+    @Args('pagination', { nullable: true })
+    filter: GetProductsCursorFilterInput,
+  ) {
+    return this.productService.findAllCursor(filter);
   }
 
   @Auth()
@@ -124,43 +128,17 @@ export class ProductsResolver {
     return this.productService.remove(user, id);
   }
 
-  // @ResolveField(() => [String], { nullable: 'itemsAndList' })
-  // async images(@Parent() product: Product) {
-  //   if (!product.images?.length) {
-  //     return [];
-  //   }
-
-  //   // This is not the most optimal solution, as it can lead to N+1 problems.
-  //   // A better approach would be to use a DataLoader to batch fetch files.
-  //   // However, for simplicity, we are fetching them one by one here.
-  //   const files = await this.fileRepository.findByIds(product.images);
-
-  //   if (!files.length) return [];
-
-  //   const urls = await Promise.all(
-  //     files.map((file) =>
-  //       this.presignedUrlService.getDownloadPresignedUrl(file),
-  //     ),
-  //   );
-
-  //   return urls;
-  // }
-
   @Auth()
   @Query(() => FilesPaginated)
   async productImages(
     @CurrentUser() user: User,
     @Args('productId', ParseUUIDPipe) productId: string,
-    @Args( { nullable: true }) input: NullablePaginatorArgsInput,
+    @Args({ nullable: true }) input: NullablePaginatorArgsInput,
   ): Promise<any> {
-    return this.productService.productImages(
-      user,
-      productId,
-      input.paginate,
-    );
+    return this.productService.productImages(user, productId, input.paginate);
   }
 
-  @ResolveField(() => Vendor) 
+  @ResolveField(() => Vendor)
   async vendor(@Parent() product: Product) {
     if (product.vendor) return product.vendor;
     return this.vendorDataLoader.getDataloader().load(product.vendorId);

@@ -85,15 +85,18 @@ export class CategoriesResolver {
   })
   async removeCategory(@Args('id', { type: () => String }) id: string) {
     return this.categoriesService.remove(id);
-  }
-  @ResolveField(() => [Category])
-  async children(@Parent() category: Category) {
-    return this.subcategoriesLoader.getDataloader().load(category.id);
+
   }
 
-  //   @ResolveField(() => Category, { nullable: true })
-  //   async parent(@Parent() category: Category) {
-  //     if (!category.parentId) return null;
-  //     return this.categoryLoader.batchCategories.load(category.parentId);
-  //   }
+
+  // @ResolveField(() => [Category])
+  // async children(@Parent() category: Category) {
+  //   return this.subcategoriesLoader.getDataloader().load(category.id);
+  // }
+
+    // @ResolveField(() => Category, { nullable: true })
+    // async parent(@Parent() category: Category) {
+    //   if (!category.parentId) return null;
+    //   return this.categoryLoader.batchCategories.load(category.parentId);
+    // }
 }

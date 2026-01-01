@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   Between,
+  FindOptionsRelations,
   FindOptionsWhere,
   ILike,
   In,
@@ -24,6 +25,8 @@ import { VendorStatus } from '../../vendors/enums/vendor-status.enum';
 import { UserRoleEnum } from 'src/common/enums/user-role.enum';
 import { File } from 'src/modules/core/media/entities/file.entity';
 import { FileReferenceService } from 'src/modules/core/media/services/file-reference.service';
+import { GetProductsCursorFilterInput } from '../dto/inputs/cursor-pagination.input';
+import { OrderBy } from '../dto/inputs/orderBy.input';
 @Injectable()
 export class ProductService {
   constructor(
@@ -168,6 +171,55 @@ export class ProductService {
       //   vendor: true,
       //   category: true,
       // }
+    );
+  }
+
+  async findAllCursor(input?: GetProductsCursorFilterInput) {
+    const where: FindOptionsWhere<Product> = {};
+    let finalWhere: FindOptionsWhere<Product> | FindOptionsWhere<Product>[] =
+      where;
+
+    if (input?.productFilter) {
+      const { search, vendorName, categoryName, minPrice, maxPrice } =
+        input.productFilter;
+
+      if (minPrice !== undefined && maxPrice !== undefined) {
+        where.price = Between(minPrice, maxPrice);
+      } else if (minPrice !== undefined) {
+        where.price = MoreThanOrEqual(minPrice);
+      } else if (maxPrice !== undefined) {
+        where.price = LessThanOrEqual(maxPrice);
+      }
+
+      if (vendorName) {
+        where.vendor = { businessName: ILike(`%${vendorName}%`) };
+      }
+
+      if (categoryName) {
+        where.category = { name: ILike(`%${categoryName}%`) };
+      }
+
+      if (search) {
+        finalWhere = [
+          { ...where, name: ILike(`%${search}%`) },
+          { ...where, description: ILike(`%${search}%`) },
+        ];
+      } else {
+        finalWhere = where;
+      }
+    }
+
+    const orderBy: Record<string, 'ASC' | 'DESC'> = {};
+    if (input?.orderBy?.field && input?.orderBy?.order) {
+      orderBy[input.orderBy.field] = input.orderBy.order;
+    } else {
+      orderBy.createdAt = 'DESC';
+    }
+
+    return await this.productRepo.findCursorPaginated(
+      finalWhere,
+      input?.paginate!,
+      input?.orderBy,
     );
   }
 

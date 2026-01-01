@@ -49,7 +49,7 @@ export class CategoriesService {
   async category(id: string): Promise<Category> {
     return this.categoryRepo.findOneOrFail({
       where: { id },
-      relations: ['parent'],
+      relations: ['parent', 'children'],
     });
   }
 
